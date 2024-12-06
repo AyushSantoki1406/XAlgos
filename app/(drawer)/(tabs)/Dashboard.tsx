@@ -1,10 +1,62 @@
 import React, { useContext, useState, useEffect } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet,ScrollView } from "react-native";
 import { ThemeContext } from "../../../utils/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 import NoInternet from "../../_root/NoInternet";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
+import axios from "axios";
+import { ProductionUrl } from "../../../URL/URL";
+
+const CryptoCard = ({ item }) => {
+
+  const { currentTheme } = useContext(ThemeContext);
+
+  return (
+  
+    <ScrollView style={[styles.container, styles.light]}>
+
+      <View style={[styles.statsCard,{backgroundColor:currentTheme.card}]}>
+        <View style={styles.statItem}>
+          <Text style={[styles.label,{color:currentTheme.color}]}>Trade Ratio</Text>
+          <Text style={[styles.value,{color:currentTheme.color}]}><Text style={styles.green}>0%</Text> / <Text style={styles.red}>0%</Text></Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={[styles.label,{color:currentTheme.color}]}>Number of trades</Text>
+          <Text style={[styles.value,{color:currentTheme.color}]}>0</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={[styles.label,{color:currentTheme.color}]}>Profit gained</Text>
+          <Text style={styles.green}>0%</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={[styles.label,{color:currentTheme.color}]}>Percentage gain</Text>
+          <Text style={styles.red}>0%</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={[styles.label,{color:currentTheme.color}]}>Working time</Text>
+          <Text style={[styles.value,{color:currentTheme.color}]}>5h 23m</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={[styles.label,{color:currentTheme.color}]}>Status</Text>
+          <Text style={styles.green}>Active</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={[styles.label,{color:currentTheme.color}]}>Total Balance</Text>
+          <Text style={styles.green}>₹2012.02</Text>
+        </View>
+        <View style={styles.statItem}>
+          <Text style={[styles.label,{color:currentTheme.color}]}>Orders</Text>
+          <Text style={[styles.value,{color:currentTheme.color}]}>0</Text>
+        </View>
+      </View>
+    </ScrollView>
+  );
+};
 
 const data = [
   { id: "1", quantity: "100", profit: "+$ 50.00", ltp: "$ 90000.00" },
@@ -12,52 +64,32 @@ const data = [
   { id: "3", quantity: "100", profit: "+$ 50.00", ltp: "$ 90000.00" },
 ];
 
-const CryptoCard = ({ item }) => {
-  const { currentTheme } = useContext(ThemeContext);
-
-  return (
-    <View
-      style={[styles.card, { backgroundColor: currentTheme.secondbackground }]}
-    >
-      <View style={styles.headerRow}>
-        <Text style={[styles.cryptoTitle, { color: currentTheme.color }]}>
-          BTCUSD{" "}
-          <Text style={[styles.label, { color: currentTheme.color }]}>
-            (100 Qtn)
-          </Text>
-        </Text>
-        <Text style={[styles.profit, styles.positive]}>{item.profit}</Text>
-      </View>
-
-      {/* Quantity Row */}
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: currentTheme.color }]}>
-          Entry Price: 6969
-        </Text>
-        <Text style={styles.value}></Text>
-      </View>
-
-      {/* Entry & Exit Price Row */}
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: currentTheme.color }]}>
-          Exit Price: 7676
-        </Text>
-        <Text style={styles.value}></Text>
-        <Text style={[styles.ltp, { color: currentTheme.color }]}>
-          LTP {item.ltp}
-        </Text>
-      </View>
-
-      {/* LTP */}
-      <View style={styles.row}></View>
-    </View>
-  );
-};
-
 const Dashboard = () => {
   const { currentTheme } = useContext(ThemeContext);
   const [isConnected, setIsConnected] = useState(true);
-  const [email, setEmail] = useState(null);
+  const [Email, setEmail] = useState("");
+
+  const url =
+    process.env.NODE_ENV === "production"
+      ? ProductionUrl
+      : ProductionUrl;
+
+const fetchdata = async() =>{
+  try{
+    console.log("asdddddd")
+    const Email = await AsyncStorage.getItem("Email");
+    setEmail(Email);
+    console.log("........",Email)
+    const response = await axios.post(`${url}/dbSchema`, { Email })
+    console.log(response.data)
+  }
+  catch(e){
+    console.log("///",e)
+  }
+}
+useEffect(() => {
+  fetchdata();
+}, []);
 
   useEffect(() => {
     AsyncStorage.getItem("Email").then((value) => setEmail(value));
@@ -71,7 +103,7 @@ const Dashboard = () => {
     };
   }, []);
 
-  if (email === null) {
+  if (Email === null) {
     return (
       <SafeAreaView
         style={[styles.container, { backgroundColor: currentTheme.background }]}
@@ -92,74 +124,99 @@ const Dashboard = () => {
   }
 
   return (
+    <ScrollView style={[styles.container, styles.light]}>
     <SafeAreaView
       style={[styles.container, { backgroundColor: currentTheme.background }]}
     >
       <View>
+      <View style={[styles.headerRow,{backgroundColor:currentTheme.card}]}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerItem}>
+            <Text style={[styles.label,{color:currentTheme.color}]}>P&L</Text>
+            <Text style={[styles.value,{color:currentTheme.color}]}>₹</Text>
+          </View>
+          <View style={styles.headerItem}>
+            <Text style={[styles.label,{color:currentTheme.color}]}>Capital</Text>
+            <Text style={styles.green}>₹2012.02</Text>
+          </View>
+        </View>
+      </View>
+      <ScrollView style={[styles.container, styles.light]}>
         {data.map((item) => (
           <CryptoCard key={item.id} item={item} />
         ))}
+      </ScrollView>
+
       </View>
     </SafeAreaView>
+    </ScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
   },
-  card: {
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+  light: {
   },
   headerRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: wp('4%'),
+    marginHorizontal:wp('2%'),
+    marginVertical: hp('2%'),
+    borderRadius:20
   },
-  cryptoTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
+  headerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
   },
-  profit: {
-    fontSize: 18,
-    fontWeight: "bold",
+  headerItem: {
+    alignItems: 'center',
+    flex: 1,
   },
-  positive: {
-    color: "green",
+  sectionHeader: {
+    fontSize: wp('5%'),
+    fontWeight: 'bold',
+    paddingVertical: hp('1%'),
+    textAlign: 'center',
+    color: '#495057',
   },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  statsCard: {
+    borderRadius: wp('2%'),
+    margin: wp('4%'),
+    padding: wp('4%'),
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  statItem: {
+    marginBottom: hp('2%'),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   label: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: wp('4%'),
+    color: '#6c757d',
   },
   value: {
-    fontSize: 16,
+    fontSize: wp('4%'),
+    fontWeight: 'bold',
   },
-  ltp: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "left",
+  green: {
+    color: '#28a745',
   },
-  noConnectionContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  red: {
+    color: '#dc3545',
   },
-  noConnectionText: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  noConnectionMessage: {
-    fontSize: 16,
-    textAlign: "center",
-    marginTop: 10,
+  accountInfo: {
+    paddingVertical: hp('1%'),
+    paddingHorizontal: wp('4%'),
   },
 });
 

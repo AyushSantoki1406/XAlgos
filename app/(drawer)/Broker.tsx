@@ -120,7 +120,11 @@ export default function Broker() {
               <View style={styles.row}>
                 <View style={styles.infoSection}>
                   <Text style={[styles.label2, { color: currentTheme.color }]}>
-                    AngleOne
+                    {broker.userData
+                          ? "AngelOne"
+                          : broker.deltaApiKey
+                          ? "Delta"
+                          : "Unknown"}
                   </Text>
                 </View>
                 <View style={styles.buttonContainer}>
@@ -155,7 +159,12 @@ export default function Broker() {
                   ]}
                   numberOfLines={1}
                 >
-                  {broker?.userData?.data?.name || "N/A"}
+                  {broker.userData
+                          ? broker.userData.data.name.toUpperCase()
+                          : broker.userDetails?.result?.first_name?.toUpperCase() +
+                              " " +
+                              broker.userDetails?.result?.last_name.toUpperCase() ||
+                            "N/A"}
                 </Text>
               </View>
 
@@ -164,7 +173,9 @@ export default function Broker() {
                   Client Id
                 </Text>
                 <Text style={[styles.value, { color: currentTheme.color }]}>
-                  {broker?.userData?.data?.clientcode || "N/A"}
+                  {broker.userData
+                          ? broker.userData.data.clientcode
+                          : broker.deltaApiKey && "No Client Code"}
                 </Text>
               </View>
 

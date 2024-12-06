@@ -21,6 +21,9 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ProductionUrl } from "../../URL/URL";
 
+// XubP4vdMGZ9Muuiy5AKtmLNmY0k8unCzQCFD933kUg7KTnF8c4IyM1ytG3I9
+// u6PGxvu2GMqJcTX7hAJPnF0ijCSTWs
+
 export default function App() {
   const navigator = useNavigation();
   const { currentTheme } = useContext(ThemeContext);
@@ -315,38 +318,6 @@ export default function App() {
               ]}
             >
               <TextInput
-                placeholder="Topt Key"
-                style={[
-                  styles.input,
-                  {
-                    color:
-                      (currentTheme.theme as unknown as string) === "light"
-                        ? "#000000"
-                        : "#FFFFFF",
-                  },
-                ]}
-                placeholderTextColor={
-                  (currentTheme.theme as unknown as string) === "light"
-                    ? "#000000"
-                    : "#FFFFFF"
-                }
-                value={toptKey}
-                onChangeText={setToptKey}
-              />
-            </View>
-
-            <View
-              style={[
-                styles.inputContainer,
-                {
-                  backgroundColor:
-                    (currentTheme.theme as unknown as string) === "light"
-                      ? "#ffffff"
-                      : "#000000",
-                },
-              ]}
-            >
-              <TextInput
                 placeholder="Api Key"
                 style={[
                   styles.input,
@@ -364,6 +335,38 @@ export default function App() {
                 }
                 value={apiKey}
                 onChangeText={setApiKey}
+              />
+            </View>
+
+            <View
+              style={[
+                styles.inputContainer,
+                {
+                  backgroundColor:
+                    (currentTheme.theme as unknown as string) === "light"
+                      ? "#ffffff"
+                      : "#000000",
+                },
+              ]}
+            >
+              <TextInput
+                placeholder="Topt Key"
+                style={[
+                  styles.input,
+                  {
+                    color:
+                      (currentTheme.theme as unknown as string) === "light"
+                        ? "#000000"
+                        : "#FFFFFF",
+                  },
+                ]}
+                placeholderTextColor={
+                  (currentTheme.theme as unknown as string) === "light"
+                    ? "#000000"
+                    : "#FFFFFF"
+                }
+                value={toptKey}
+                onChangeText={setToptKey}
               />
             </View>
           </>
