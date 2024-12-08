@@ -1,5 +1,12 @@
 import React, { useContext, useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  TouchableOpacity,
+} from "react-native";
 import { ThemeContext } from "../../../utils/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -12,17 +19,13 @@ import {
 import axios from "axios";
 import { ProductionUrl } from "../../../URL/URL";
 
-const data = [
-  { id: "1", quantity: "100", profit: "+$ 50.00", ltp: "$ 90000.00" },
-  { id: "2", quantity: "100", profit: "+$ 50.00", ltp: "$ 90000.00" },
-  { id: "3", quantity: "100", profit: "+$ 50.00", ltp: "$ 90000.00" },
-];
-
 const Dashboard = () => {
   const { currentTheme } = useContext(ThemeContext);
   const [isConnected, setIsConnected] = useState(true);
   const [Email, setEmail] = useState("");
   const [broker, setBroker] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [capital, setCapital] = useState("");
 
   const url =
     process.env.NODE_ENV === "production" ? ProductionUrl : ProductionUrl;
@@ -44,6 +47,12 @@ const Dashboard = () => {
       console.log("///", e);
     }
   };
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchdata();
+    setRefreshing(false);
+  };
+
   useEffect(() => {
     fetchdata();
   }, []);
@@ -81,7 +90,16 @@ const Dashboard = () => {
   }
 
   return (
-    <ScrollView style={[styles.container, styles.light]}>
+    <ScrollView
+      style={[
+        styles.container,
+        styles.light,
+        { backgroundColor: currentTheme.background },
+      ]}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <SafeAreaView
         style={[styles.container, { backgroundColor: currentTheme.background }]}
       >
@@ -107,9 +125,13 @@ const Dashboard = () => {
             </View>
           </View>
           <ScrollView style={[styles.container, styles.light]}>
-            {broker.map((item) => (
-              <CryptoCard key={item.id} item={item} />
-            ))}
+            {broker.map((item, index) => {
+              const uniqueKey =
+                item.id ||
+                item.userData?.data?.clientcode ||
+                `fallback-${index}`;
+              return <CryptoCard key={uniqueKey} item={item} />;
+            })}
           </ScrollView>
         </View>
       </SafeAreaView>
@@ -119,53 +141,86 @@ const Dashboard = () => {
 
 const CryptoCard = ({ item }) => {
   const { currentTheme } = useContext(ThemeContext);
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleVisibility = () => {
+    setIsVisible((prev) => !prev);
+  };
 
   return (
     <View style={[styles.statsCard, { backgroundColor: currentTheme.card }]}>
-      <View style={styles.statItem}>
-        <Text style={[styles.label, { color: currentTheme.color }]}>Name</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          <Text style={[styles.value2, { color: currentTheme.color }]}>
-            <Text style={styles.value2} numberOfLines={1}>
-              {item.userData
-                ? item.userData.data.name.toUpperCase()
-                : item.userDetails?.result?.first_name?.toUpperCase() +
-                    " " +
-                    item.userDetails?.result?.last_name.toUpperCase() || "N/A"}
+      <TouchableOpacity
+        onPress={toggleVisibility}
+        style={styles.dropdownHeader}
+      >
+        <Text
+          style={[
+            styles.dropdownText,
+            { color: currentTheme.color, paddingBottom: hp("1%") },
+          ]}
+        >
+          Account Information
+        </Text>
+        <Text style={[styles.icon, { color: currentTheme.color }]}>
+          {isVisible ? "▲" : "▼"}
+        </Text>
+      </TouchableOpacity>
+
+      {isVisible && (
+        <View style={styles.accountInfo}>
+          <View style={styles.statItem}>
+            <Text style={[styles.label, { color: currentTheme.color }]}>
+              Name
             </Text>
-          </Text>
-        </ScrollView>
-        <Text style={[styles.label, { color: currentTheme.color }]}>
-          Broker
-        </Text>
-        <Text style={[styles.value, { color: currentTheme.color }]}>
-          <Text style={styles.green}>
-            {item.userData
-              ? "AngelOne"
-              : item.deltaApiKey
-              ? "Delta"
-              : "Unknown"}
-          </Text>
-        </Text>
-      </View>
-      <View style={styles.statItem}>
-        <Text style={[styles.label, { color: currentTheme.color }]}>
-          User Id
-        </Text>
-        <Text style={[styles.value, { color: currentTheme.color }]}>
-          <Text style={styles.green}>
-            {item.userData
-              ? item.userData.data.clientcode
-              : item.userDetails?.result?.phishing_code || "N/A"}
-          </Text>
-        </Text>
-        <Text style={[styles.label, { color: currentTheme.color }]}>
-          Strategy No:
-        </Text>
-        <Text style={[styles.value, { color: currentTheme.color }]}>
-          <Text style={styles.green}>1</Text>
-        </Text>
-      </View>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              <Text style={[styles.value2, { color: currentTheme.color }]}>
+                <Text style={styles.value2} numberOfLines={1}>
+                  {item.userData
+                    ? item.userData.data.name.toUpperCase()
+                    : item.userDetails?.result?.first_name?.toUpperCase() +
+                        " " +
+                        item.userDetails?.result?.last_name.toUpperCase() ||
+                      "N/A"}
+                </Text>
+              </Text>
+            </ScrollView>
+          </View>
+
+          <View style={styles.statItem}>
+            <Text style={[styles.value, { color: currentTheme.color }]}>
+              <Text style={[styles.label, { color: currentTheme.color }]}>
+                Broker
+              </Text>
+              <Text style={styles.green}>
+                {item.userData
+                  ? "AngelOne"
+                  : item.deltaApiKey
+                  ? "Delta"
+                  : "Unknown"}
+              </Text>
+            </Text>
+          </View>
+
+          <View style={styles.statItem}>
+            <Text style={[styles.value, { color: currentTheme.color }]}>
+              <Text style={[styles.label, { color: currentTheme.color }]}>
+                User Id
+              </Text>
+              <Text style={styles.green}>
+                {item.userData
+                  ? item.userData.data.clientcode
+                  : item.userDetails?.result?.phishing_code || "N/A"}
+              </Text>
+            </Text>
+            <Text style={[styles.value, { color: currentTheme.color }]}>
+              <Text style={[styles.label, { color: currentTheme.color }]}>
+                Strategy No:
+              </Text>
+              <Text style={styles.green}>1</Text>
+            </Text>
+          </View>
+        </View>
+      )}
       <View style={styles.statItem}>
         <Text style={[styles.label, { color: currentTheme.color }]}>
           Trade Ratio
@@ -226,7 +281,7 @@ const CryptoCard = ({ item }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: hp("5%"),
+    paddingBottom: hp("5%"),
   },
   light: {},
   headerRow: {
@@ -278,12 +333,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   value2: {
-    marginHorizontal: wp("5%"),
+    marginHorizontal: wp("1%"),
     fontSize: wp("4%"),
     fontWeight: "bold",
   },
   green: {
     color: "#28a745",
+    paddingLeft: wp("2%"),
   },
   red: {
     color: "#dc3545",
@@ -291,6 +347,19 @@ const styles = StyleSheet.create({
   accountInfo: {
     paddingVertical: hp("1%"),
     paddingHorizontal: wp("4%"),
+  },
+  dropdownText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  icon: {
+    fontSize: 16,
+  },
+  dropdownHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: hp("1%"),
   },
 });
 

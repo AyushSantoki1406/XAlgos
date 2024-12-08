@@ -110,6 +110,7 @@ const MyStrategies = () => {
   };
 
   const handleDeploy = async (selectedStrategyId) => {
+    setLoading(true);
     console.log("deployed");
     const Email = await AsyncStorage.getItem("Email");
     try {
@@ -122,7 +123,7 @@ const MyStrategies = () => {
       });
       console.log(response);
       setModalVisible(false);
-
+      setLoading(false);
       // Clear the state values
       setIndex([]);
       setQuantity("");
@@ -130,6 +131,7 @@ const MyStrategies = () => {
     } catch (e) {
       console.log(e);
       setModalVisible(false);
+      setLoading(false);
     }
   };
 
@@ -448,7 +450,6 @@ const MyStrategies = () => {
                           Please configure the details below before deploying
                           the strategy:
                         </Text>
-
                         <View style={styles.pickerContainer}>
                           <Text
                             style={[
@@ -481,7 +482,6 @@ const MyStrategies = () => {
                             onChangeText={setQuantity}
                           />
                         </View>
-
                         <View style={styles.pickerContainer}>
                           <Text
                             style={[
@@ -528,7 +528,6 @@ const MyStrategies = () => {
                             </>
                           </View>
                         </View>
-
                         <View style={styles.pickerContainer}>
                           <Text
                             style={[
@@ -538,14 +537,13 @@ const MyStrategies = () => {
                           >
                             Select Index:
                           </Text>
-                          <View style={{ borderColor: "gray", borderWidth: 2 }}>
+                          <View style={{ borderColor: "gray", borderWidth: 2,backgroundColor:currentTheme.background }}>
                             <Picker
                               selectedValue={Index}
                               onValueChange={(itemValue) => setIndex(itemValue)}
                               style={[
                                 {
-                                  color:
-                                    currentTheme.deployButtonDisabledBackground,
+                                  color: currentTheme.color,
                                   backgroundColor: currentTheme.background,
                                   borderColor: "gray",
                                   borderWidth: 2,
@@ -567,7 +565,6 @@ const MyStrategies = () => {
                             </Picker>
                           </View>
                         </View>
-
                         <TouchableOpacity
                           style={[
                             styles.button,
@@ -576,16 +573,21 @@ const MyStrategies = () => {
                                 currentTheme.deployButtonDisabledBackground,
                             },
                           ]}
-                          onPress={() => handleDeploy(strategy._id)}
+                          onPress={() => handleDeploy(strategy._id)} // Pass the required ID
+                          disabled={loading} // Disable button while loading
                         >
-                          <Text
-                            style={[
-                              styles.buttonText,
-                              { color: currentTheme.color },
-                            ]}
-                          >
-                            Submit
-                          </Text>
+                          {loading ? (
+                            <ActivityIndicator color={currentTheme.color} />
+                          ) : (
+                            <Text
+                              style={[
+                                styles.buttonText,
+                                { color: currentTheme.color },
+                              ]}
+                            >
+                              Submit
+                            </Text>
+                          )}
                         </TouchableOpacity>
 
                         <TouchableOpacity

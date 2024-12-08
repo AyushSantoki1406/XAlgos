@@ -31,7 +31,8 @@ const PaperTradeTable = () => {
   const [ids, setId] = useState("");
   const [DeployedData, setDeployedData] = useState("");
 
-  const url = process.env.NODE_ENV === "test" ? ProductionUrl : ProductionUrl;
+  const url =
+    process.env.NODE_ENV === "production" ? ProductionUrl : ProductionUrl;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +44,7 @@ const PaperTradeTable = () => {
           Email: email,
         });
         setUserSchema(response.data);
+        console.log(response.data);
         setId(response.data.DeployedStrategies);
 
         const response2 = await axios.post(`${url}/getMarketPlaceData`, {
@@ -161,7 +163,10 @@ const PaperTradeTable = () => {
                   key={index}
                   style={[
                     styles.tableHeaderText,
-                    { color: currentTheme.color },
+                    {
+                      color: currentTheme.color,
+                      backgroundColor: currentTheme.table,
+                    },
                   ]}
                 >
                   {header}
@@ -257,7 +262,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     padding: wp("0.5%"),
     width: wp("20%"),
-    backgroundColor: "red",
     borderWidth: 1,
   },
   tableRow: {

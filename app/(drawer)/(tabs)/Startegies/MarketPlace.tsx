@@ -54,9 +54,9 @@ export default function MarketPlace() {
   const [subscribedStrategies, setSubscribedStrategies] = useState<string[]>(
     []
   );
-  const [loading, setLoading] = useState<boolean>(true); // Track loading state
+  const [loading, setLoading] = useState<boolean>(true);
   const [isConnected, setIsConnected] = useState(true);
-  const [refreshing, setRefreshing] = useState(false); // State for refreshing
+  const [refreshing, setRefreshing] = useState(false);
 
   const url = process.env.NODE_ENV === "test" ? ProductionUrl : ProductionUrl;
 
@@ -75,7 +75,6 @@ export default function MarketPlace() {
       setLoading(false);
     }
   };
-  fetchData();
 
   const handleSubscribe = async (strategyId: string) => {
     try {
@@ -118,6 +117,10 @@ export default function MarketPlace() {
     await fetchData();
     setRefreshing(false);
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   if (!isConnected) {
     return (

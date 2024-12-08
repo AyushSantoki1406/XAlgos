@@ -24,7 +24,9 @@ export type Theme = {
   addLogo: ImageSourcePropType;
   iconColor: string;
   profilebg: string;
-  card:string;
+  card: string;
+  table: string;
+  tableText: string;
 };
 
 // Define the themes
@@ -33,7 +35,7 @@ const theme = {
     theme: "light" as const,
     color: "#000000",
     background: "#F4F4F4",
-    secondbackground:"#F5F5F5",
+    secondbackground: "#F5F5F5",
     shadowColor: "#000000",
     subscribeButton: "#1a1a1a",
     subscribedButtonBackground: "#BDBDBD",
@@ -47,13 +49,15 @@ const theme = {
     addLogo: lightAdd,
     iconColor: "#000000",
     profilebg: "gray",
-    card:"#FFFFFF",
+    card: "#FFFFFF",
+    table: "#EAEAEA",
+    tableText: "#1C1C1C",
   },
   dark: {
     theme: "dark" as const,
     color: "#FFFFFF",
     background: "#000000",
-    secondbackground:"#121212",
+    secondbackground: "#121212",
     shadowColor: "#FFFFFF",
     subscribeButton: "#fff",
     subscribeText: "#000000",
@@ -67,7 +71,9 @@ const theme = {
     addLogo: darladd,
     iconColor: "#FFFFFF",
     profilebg: "#1e1e1e",
-    card:"#1a1a1a",
+    card: "#1a1a1a",
+    table: "#282828",
+    tableText: "#E0E0E0",
   },
 };
 
