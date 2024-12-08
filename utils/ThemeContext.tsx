@@ -8,6 +8,7 @@ import darladd from "../assets/images/dark_add.png";
 // Define the Theme type
 export type Theme = {
   theme: "light" | "dark";
+  maincolor: string;
   color: string;
   background: string;
   secondbackground: string;
@@ -34,6 +35,7 @@ const theme = {
   light: {
     theme: "light" as const,
     color: "#000000",
+    maincolor: "#FCD535",
     background: "#F4F4F4",
     secondbackground: "#F5F5F5",
     shadowColor: "#000000",
@@ -56,6 +58,7 @@ const theme = {
   dark: {
     theme: "dark" as const,
     color: "#FFFFFF",
+    maincolor: "#FCD535",
     background: "#000000",
     secondbackground: "#121212",
     shadowColor: "#FFFFFF",

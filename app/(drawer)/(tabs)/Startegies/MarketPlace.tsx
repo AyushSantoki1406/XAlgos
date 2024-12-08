@@ -8,6 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   RefreshControl,
+  Modal,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import image from "../../../../assets/images/strategie_img.png";
@@ -22,6 +23,7 @@ import NetInfo from "@react-native-community/netinfo";
 import NoInternet from "../../../_root/NoInternet";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
+import { Picker } from "@react-native-picker/picker";
 
 interface Strategy {
   _id: string;
@@ -48,8 +50,8 @@ const formatDate = (date: string) => {
 };
 
 export default function MarketPlace() {
+  const [email, setemail] = useState("");
   const { currentTheme } = useContext(ThemeContext);
-  const [email, setEmail] = useState("");
   const [strategyData, setStrategyData] = useState<Strategy[]>([]);
   const [subscribedStrategies, setSubscribedStrategies] = useState<string[]>(
     []
@@ -57,13 +59,18 @@ export default function MarketPlace() {
   const [loading, setLoading] = useState<boolean>(true);
   const [isConnected, setIsConnected] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [Account, setAccount] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [Quaninty, setQuaninty] = useState("");
+  const [Index, setIndex] = useState("");
 
   const url = process.env.NODE_ENV === "test" ? ProductionUrl : ProductionUrl;
 
   const fetchData = async () => {
     try {
       const email = await AsyncStorage.getItem("Email");
-      setEmail(email);
+      setemail(email);
       const response = await axios.post(`${url}/getMarketPlaceData`, {
         email,
       });
@@ -119,6 +126,55 @@ export default function MarketPlace() {
   };
 
   useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleDeployed = (selectedStrategyId) => {
+    setModalVisible(true);
+  };
+
+  const handleDeploy = async (strategyId) => {
+    setLoading(true);
+    try {
+      console.log(strategyId);
+      const response = await axios.post(`${url}/addDeployed`, {
+        Email: email,
+        selectedStrategyId: strategyId,
+        Index: "index 1",
+        Quaninty: 300,
+        Account,
+      });
+      console.log(response.data);
+      setLoading(false);
+      setModalVisible(false);
+    } catch (e) {
+      console.log(e);
+      setModalVisible(false);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const Email = await AsyncStorage.getItem("Email");
+        setemail(Email);
+        const response = await axios.post(`${url}/dbschema`, {
+          Email,
+        });
+
+        if (Array.isArray(response.data.BrokerData)) {
+          setAccount(response.data.BrokerIds);
+        } else {
+          console.error("BrokerData is not an array");
+          setAccount([]);
+        }
+      } catch (e) {
+        console.log(e);
+        setAccount([]);
+      }
+    };
+
     fetchData();
   }, []);
 
@@ -317,6 +373,7 @@ export default function MarketPlace() {
                     },
                   ]}
                   disabled={!subscribedStrategies.includes(strategy._id)}
+                  onPress={() => handleDeployed(strategy._id)}
                 >
                   <Text
                     style={[
@@ -330,6 +387,192 @@ export default function MarketPlace() {
                   >
                     Deploy
                   </Text>
+
+                  <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={modalVisible}
+                    onRequestClose={() => setModalVisible(false)}
+                  >
+                    <View style={[styles.overlay]}>
+                      <View
+                        style={[
+                          styles.modalContainer,
+                          { backgroundColor: currentTheme.card },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.headerText,
+                            { color: currentTheme.color, textAlign: "center" },
+                          ]}
+                        >
+                          Deployment Configuration
+                        </Text>
+
+                        <Text
+                          style={[
+                            styles.descriptionText,
+                            {
+                              color: currentTheme.color,
+                              textAlign: "center",
+                              marginTop: hp("1%"),
+                            },
+                          ]}
+                        >
+                          Please configure the details below before deploying
+                          the strategy:
+                        </Text>
+                        <View style={styles.pickerContainer}>
+                          <Text
+                            style={[
+                              styles.labelText,
+                              { color: currentTheme.color },
+                            ]}
+                          >
+                            Select Account:
+                          </Text>
+                          <View
+                            style={{
+                              borderColor: "gray",
+                              borderWidth: 2,
+                              height: hp("8%"),
+                              borderRadius: 10,
+                            }}
+                          >
+                            <>
+                              {Array.isArray(Account) && Account.length > 0 ? (
+                                <View>
+                                  <Picker
+                                    selectedValue={selectedItem}
+                                    onValueChange={(itemValue) => {
+                                      setSelectedItem(itemValue);
+                                    }}
+                                    style={{
+                                      width: "100%",
+                                      color: currentTheme.color,
+                                    }}
+                                  >
+                                    <Picker.Item
+                                      label="Select a broker..."
+                                      color={
+                                        currentTheme.theme === "dark"
+                                          ? "#000000"
+                                          : "#FFFFFF"
+                                      }
+                                      value=""
+                                      style={{
+                                        height: hp("6%"),
+                                        borderColor: "gray",
+                                        borderWidth: 1,
+                                      }}
+                                    />
+                                    {Account.map((item, index) => (
+                                      <Picker.Item
+                                        key={index}
+                                        color={
+                                          currentTheme.theme === "dark"
+                                            ? "#000000"
+                                            : "#FFFFFF"
+                                        }
+                                        label={item.toString()} // Ensure label is always a string
+                                        value={item.toString()} // Ensure value matches the type of selectedItem
+                                      />
+                                    ))}
+                                  </Picker>
+                                </View>
+                              ) : (
+                                <Text
+                                  style={{
+                                    textAlign: "center",
+                                    textAlignVertical: "center",
+                                    flex: 1,
+                                    color: currentTheme.color,
+                                  }}
+                                >
+                                  No broker
+                                </Text>
+                              )}
+                            </>
+                          </View>
+
+                          <TouchableOpacity
+                            style={[
+                              styles.button2,
+                              {
+                                backgroundColor: currentTheme.maincolor,
+                                paddingVertical: hp("1.5%"), // Vertical padding for responsiveness
+                                paddingHorizontal: wp("5%"), // Horizontal padding
+                                borderRadius: wp("2%"), // Smooth rounded corners
+                                alignItems: "center", // Center text or loader horizontally
+                                justifyContent: "center", // Center content vertically
+                                shadowColor: "#000", // Subtle shadow for depth
+                                shadowOffset: { width: 0, height: hp("0.2%") },
+                                shadowOpacity: 0.2,
+                                shadowRadius: wp("1%"),
+                                elevation: 3, // Shadow effect for Android
+                              },
+                            ]}
+                            onPress={() => handleDeploy(strategy._id)} // Pass the required ID
+                            disabled={loading} // Disable button while loading
+                          >
+                            {loading ? (
+                              <ActivityIndicator color={currentTheme.color} />
+                            ) : (
+                              <Text
+                                style={[
+                                  styles.buttonText2,
+                                  {
+                                    color: currentTheme.color,
+                                    fontSize: wp("4%"), // Responsive font size
+                                    fontWeight: "600", // Semi-bold for emphasis
+                                    textTransform: "uppercase", // Makes text stand out
+                                  },
+                                ]}
+                              >
+                                Submit
+                              </Text>
+                            )}
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            style={[
+                              styles.button2,
+                              {
+                                backgroundColor: "#FF0000", // Static background color
+                                paddingVertical: hp("1.5%"), // Vertical padding for responsiveness
+                                paddingHorizontal: wp("5%"), // Horizontal padding
+                                borderRadius: wp("2%"), // Smooth rounded corners
+                                alignItems: "center", // Center text horizontally
+                                justifyContent: "center", // Center content vertically
+                                shadowColor: "#000", // Subtle shadow for depth
+                                shadowOffset: { width: 0, height: hp("0.2%") },
+                                shadowOpacity: 0.2,
+                                shadowRadius: wp("1%"),
+                                elevation: 3, // Shadow effect for Android
+                                marginTop: hp("1%"),
+                              },
+                            ]}
+                            onPress={() => setModalVisible(false)}
+                          >
+                            <Text
+                              style={[
+                                styles.buttonText2,
+                                {
+                                  color: "#FFFFFF", // Static text color
+                                  fontSize: wp("4%"), // Responsive font size
+                                  fontWeight: "600", // Semi-bold for emphasis
+                                  textTransform: "uppercase", // Makes text stand out
+                                },
+                              ]}
+                            >
+                              Close
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  </Modal>
                 </TouchableOpacity>
               </View>
             </View>
@@ -379,6 +622,14 @@ const styles = StyleSheet.create({
     fontSize: wp("3%"),
     marginBottom: hp("1%"),
   },
+  pickerContainer: {
+    marginBottom: 20,
+  },
+  labelText: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 5,
+  },
   content: {
     marginTop: hp("2%"),
     marginBottom: hp("1%"),
@@ -392,12 +643,38 @@ const styles = StyleSheet.create({
   boldText: {
     fontWeight: "700",
   },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "90%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 3.5,
+    elevation: 5,
+  },
   infoRow: {
     flexDirection: "row",
     alignItems: "center",
     padding: hp("0.5%"),
     marginBottom: hp("1%"),
     borderRadius: wp("2%"),
+  },
+  button2: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText2: {
+    fontSize: 16,
+    color: "#FFFFFF",
+    textAlign: "center",
   },
   infoRow2: {
     flexDirection: "row",
@@ -410,7 +687,11 @@ const styles = StyleSheet.create({
     fontSize: wp("3%"),
     fontWeight: "500",
   },
-
+  descriptionText: {
+    fontSize: 16,
+    marginBottom: 20,
+    color: "gray",
+  },
   statsRow: {
     display: "flex",
     flexDirection: "row",

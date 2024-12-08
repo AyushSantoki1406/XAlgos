@@ -97,6 +97,7 @@ const MyStrategies = () => {
           (strategy) => strategy._id !== strategyId
         );
         setUserSubscribedStrategies(updatedStrategies);
+        console.log(updatedStrategies);
       } else {
         console.log("Failed to remove strategy:", response.data.message);
       }
@@ -121,10 +122,9 @@ const MyStrategies = () => {
         Quaninty,
         Account: selectedItem,
       });
-      console.log(response);
+      console.log("4444444444444", response);
       setModalVisible(false);
       setLoading(false);
-      // Clear the state values
       setIndex([]);
       setQuantity("");
       setSelectedItem(null);
@@ -145,9 +145,7 @@ const MyStrategies = () => {
         });
 
         if (Array.isArray(response.data.BrokerData)) {
-          const angelIds = response.data.BrokerData.map((item) => item.AngelId);
-          console.log("Fetched Angel IDs:", angelIds);
-          setAccount(angelIds);
+          setAccount(response.data.BrokerIds);
         } else {
           console.error("BrokerData is not an array");
           setAccount([]);
@@ -159,6 +157,7 @@ const MyStrategies = () => {
     };
     fetchData();
   }, []);
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsConnected(state.isConnected);
@@ -420,6 +419,7 @@ const MyStrategies = () => {
                       </Text>
                     </TouchableOpacity>
                   </View>
+
                   <Modal
                     animationType="slide"
                     transparent={true}
@@ -430,13 +430,13 @@ const MyStrategies = () => {
                       <View
                         style={[
                           styles.modalContainer,
-                          { backgroundColor: currentTheme.background },
+                          { backgroundColor: currentTheme.card },
                         ]}
                       >
                         <Text
                           style={[
                             styles.headerText,
-                            { color: currentTheme.color },
+                            { color: currentTheme.color, textAlign: "center" },
                           ]}
                         >
                           Deployment Configuration
@@ -444,7 +444,11 @@ const MyStrategies = () => {
                         <Text
                           style={[
                             styles.descriptionText,
-                            { color: currentTheme.color },
+                            {
+                              color: currentTheme.color,
+                              textAlign: "center",
+                              marginTop: hp("1%"),
+                            },
                           ]}
                         >
                           Please configure the details below before deploying
@@ -454,7 +458,10 @@ const MyStrategies = () => {
                           <Text
                             style={[
                               styles.labelText,
-                              { color: currentTheme.color },
+                              {
+                                color: currentTheme.color,
+                                backgroundColor: currentTheme.card,
+                              },
                             ]}
                           >
                             Quantity:
@@ -467,7 +474,10 @@ const MyStrategies = () => {
                                   "light"
                                     ? "#000000"
                                     : "#FFFFFF",
-                                backgroundColor: currentTheme.background,
+                                backgroundColor: currentTheme.card,
+                                height: hp("7%"),
+                                borderRadius: 10,
+                                paddingLeft: wp("4%"),
                                 borderColor: "gray",
                                 borderWidth: 2,
                               },
@@ -479,9 +489,11 @@ const MyStrategies = () => {
                                 : "#FFFFFF"
                             }
                             value={Quaninty}
+                            keyboardType="numeric"
                             onChangeText={setQuantity}
                           />
                         </View>
+
                         <View style={styles.pickerContainer}>
                           <Text
                             style={[
@@ -491,24 +503,37 @@ const MyStrategies = () => {
                           >
                             Select Account:
                           </Text>
-                          <View style={{ borderColor: "gray", borderWidth: 2 }}>
+                          <View
+                            style={{
+                              borderColor: "gray",
+                              borderWidth: 2,
+                              height: hp("8%"),
+                              borderRadius: 10,
+                            }}
+                          >
                             <>
                               {Array.isArray(Account) && Account.length > 0 ? (
                                 <View>
                                   <Picker
-                                    selectedValue={selectedItem} // Ensure this matches the value type of Picker.Item
+                                    selectedValue={selectedItem}
                                     onValueChange={(itemValue) => {
                                       setSelectedItem(itemValue);
                                     }}
                                     style={{
-                                      height: 50,
                                       width: "100%",
+                                      color: currentTheme.color,
                                     }}
                                   >
                                     <Picker.Item
                                       label="Select a broker..."
-                                      value="" // Default value as an empty string
+                                      color={
+                                        currentTheme.theme === "dark"
+                                          ? "#000000"
+                                          : "#FFFFFF"
+                                      }
+                                      value=""
                                       style={{
+                                        height: hp("6%"),
                                         borderColor: "gray",
                                         borderWidth: 1,
                                       }}
@@ -516,6 +541,11 @@ const MyStrategies = () => {
                                     {Account.map((item, index) => (
                                       <Picker.Item
                                         key={index}
+                                        color={
+                                          currentTheme.theme === "dark"
+                                            ? "#000000"
+                                            : "#FFFFFF"
+                                        }
                                         label={item.toString()} // Ensure label is always a string
                                         value={item.toString()} // Ensure value matches the type of selectedItem
                                       />
@@ -523,40 +553,65 @@ const MyStrategies = () => {
                                   </Picker>
                                 </View>
                               ) : (
-                                <Text>No data available</Text>
+                                <Text
+                                  style={{
+                                    textAlign: "center",
+                                    textAlignVertical: "center",
+                                    flex: 1,
+                                    color: currentTheme.color,
+                                  }}
+                                >
+                                  No broker
+                                </Text>
                               )}
                             </>
                           </View>
                         </View>
+
                         <View style={styles.pickerContainer}>
                           <Text
                             style={[
                               styles.labelText,
-                              { color: currentTheme.color },
+                              {
+                                color: currentTheme.color,
+                              },
                             ]}
                           >
                             Select Index:
                           </Text>
-                          <View style={{ borderColor: "gray", borderWidth: 2,backgroundColor:currentTheme.background }}>
+                          <View
+                            style={{
+                              borderColor: "gray",
+                              borderWidth: 2,
+                              height: hp("8%"),
+                              borderRadius: 10,
+                              overflow: "hidden",
+                              backgroundColor: currentTheme.card,
+                            }}
+                          >
                             <Picker
                               selectedValue={Index}
                               onValueChange={(itemValue) => setIndex(itemValue)}
-                              style={[
-                                {
-                                  color: currentTheme.color,
-                                  backgroundColor: currentTheme.background,
-                                  borderColor: "gray",
-                                  borderWidth: 2,
-                                },
-                              ]}
+                              style={{
+                                color: currentTheme.color,
+                                backgroundColor: currentTheme.card,
+                                height: "100%",
+                                paddingHorizontal: 10,
+                                borderRadius: 10,
+                              }}
                             >
-                              {sourceArray.map((item, Index) => (
+                              {sourceArray.map((item, index) => (
                                 <Picker.Item
-                                  key={Index}
+                                  key={index}
                                   label={item.value}
                                   value={item.key}
+                                  style={{
+                                    height: hp("6%"),
+                                    fontSize: 14,
+                                    fontWeight: "500",
+                                  }}
                                   color={
-                                    (currentTheme.theme as unknown as string)
+                                    currentTheme.theme === "dark"
                                       ? "#000000"
                                       : "#FFFFFF"
                                   }
@@ -565,12 +620,22 @@ const MyStrategies = () => {
                             </Picker>
                           </View>
                         </View>
+
                         <TouchableOpacity
                           style={[
-                            styles.button,
+                            styles.button2,
                             {
-                              backgroundColor:
-                                currentTheme.deployButtonDisabledBackground,
+                              backgroundColor: currentTheme.maincolor,
+                              paddingVertical: hp("1.5%"), // Vertical padding for responsiveness
+                              paddingHorizontal: wp("5%"), // Horizontal padding
+                              borderRadius: wp("2%"), // Smooth rounded corners
+                              alignItems: "center", // Center text or loader horizontally
+                              justifyContent: "center", // Center content vertically
+                              shadowColor: "#000", // Subtle shadow for depth
+                              shadowOffset: { width: 0, height: hp("0.2%") },
+                              shadowOpacity: 0.2,
+                              shadowRadius: wp("1%"),
+                              elevation: 3, // Shadow effect for Android
                             },
                           ]}
                           onPress={() => handleDeploy(strategy._id)} // Pass the required ID
@@ -581,8 +646,13 @@ const MyStrategies = () => {
                           ) : (
                             <Text
                               style={[
-                                styles.buttonText,
-                                { color: currentTheme.color },
+                                styles.buttonText2,
+                                {
+                                  color: currentTheme.color,
+                                  fontSize: wp("4%"), // Responsive font size
+                                  fontWeight: "600", // Semi-bold for emphasis
+                                  textTransform: "uppercase", // Makes text stand out
+                                },
                               ]}
                             >
                               Submit
@@ -592,13 +662,34 @@ const MyStrategies = () => {
 
                         <TouchableOpacity
                           style={[
-                            styles.button,
-                            { backgroundColor: "#FF0000" },
+                            styles.button2,
+                            {
+                              backgroundColor: "#FF0000", // Static background color
+                              paddingVertical: hp("1.5%"), // Vertical padding for responsiveness
+                              paddingHorizontal: wp("5%"), // Horizontal padding
+                              borderRadius: wp("2%"), // Smooth rounded corners
+                              alignItems: "center", // Center text horizontally
+                              justifyContent: "center", // Center content vertically
+                              shadowColor: "#000", // Subtle shadow for depth
+                              shadowOffset: { width: 0, height: hp("0.2%") },
+                              shadowOpacity: 0.2,
+                              shadowRadius: wp("1%"),
+                              elevation: 3, // Shadow effect for Android
+                              marginTop: hp("1%"),
+                            },
                           ]}
                           onPress={() => setModalVisible(false)}
                         >
                           <Text
-                            style={[styles.buttonText, { color: "#FFFFFF" }]}
+                            style={[
+                              styles.buttonText2,
+                              {
+                                color: "#FFFFFF", // Static text color
+                                fontSize: wp("4%"), // Responsive font size
+                                fontWeight: "600", // Semi-bold for emphasis
+                                textTransform: "uppercase", // Makes text stand out
+                              },
+                            ]}
                           >
                             Close
                           </Text>
@@ -653,6 +744,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flexDirection: "column",
+    fontSize: hp("2.6%"),
   },
   title: {
     fontSize: wp("4%"),
@@ -723,6 +815,15 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "white",
     fontWeight: "bold",
+    textAlign: "center",
+  },
+  button2: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText2: {
+    fontSize: 16,
+    color: "#FFFFFF",
     textAlign: "center",
   },
   overlay: {
