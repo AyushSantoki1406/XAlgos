@@ -107,7 +107,7 @@ const MyStrategies = () => {
     }
   };
 
-  const handleDeployed = (selectedStrategyId) => {
+  const handleDeployed = () => {
     setModalVisible(true);
   };
 
@@ -124,13 +124,12 @@ const MyStrategies = () => {
         Account: selectedItem,
       });
       console.log("4444444444444", response);
-      setModalVisible(false);
-      setLoading(false);
+    } catch (e) {
+      console.log(e);
+    } finally {
       setIndex([]);
       setQuantity("");
       setSelectedItem(null);
-    } catch (e) {
-      console.log(e);
       setModalVisible(false);
       setLoading(false);
     }
@@ -145,13 +144,9 @@ const MyStrategies = () => {
           Email,
         });
 
-        if (Array.isArray(response.data.AngelBrokerData)) {
-          const angelIds = response.data.AngelBrokerData.map(
-            (item) => item.AngelId
-          );
-
-          console.log(angelIds);
-          setAccount(angelIds);
+        if (response.data.BrokerIds) {
+          console.log(response.data.BrokerIds);
+          setAccount(response.data.BrokerIds);
         } else {
           console.error("BrokerData is not an array");
           setAccount([]);
@@ -184,6 +179,24 @@ const MyStrategies = () => {
     );
   }
 
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          { backgroundColor: currentTheme.subscribeText },
+        ]}
+      >
+        {" "}
+        <ActivityIndicator
+          size="large"
+          color={currentTheme.color}
+          style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
+        />
+      </SafeAreaView>
+    );
+  }
+
   const formatDate = (date: string) => {
     const formattedDate = new Date("2023-03-15").toLocaleDateString("en-GB", {
       day: "2-digit",
@@ -212,13 +225,7 @@ const MyStrategies = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color={currentTheme.color}
-            style={{ marginTop: "90%" }}
-          />
-        ) : userSubscribedStrategies.length === 0 ? (
+        {userSubscribedStrategies.length === 0 ? (
           <SafeAreaView
             style={[
               styles.container2,
@@ -416,7 +423,7 @@ const MyStrategies = () => {
                           borderColor: currentTheme.color,
                         },
                       ]}
-                      onPress={() => handleDeployed(strategy._id)}
+                      onPress={() => handleDeployed()}
                     >
                       <Text
                         style={[
@@ -655,7 +662,15 @@ const MyStrategies = () => {
                           disabled={loading} // Disable button while loading
                         >
                           {loading ? (
-                            <ActivityIndicator color={currentTheme.color} />
+                            <ActivityIndicator
+                              size="large"
+                              color={currentTheme.color}
+                              style={{
+                                justifyContent: "center",
+                                alignItems: "center",
+                                flex: 1,
+                              }}
+                            />
                           ) : (
                             <Text
                               style={[

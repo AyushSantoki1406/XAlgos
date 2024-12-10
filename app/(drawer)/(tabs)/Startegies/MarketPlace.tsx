@@ -165,13 +165,8 @@ export default function MarketPlace() {
         });
         console.log(response.data);
 
-        if (Array.isArray(response.data.AngelBrokerData)) {
-          const angelIds = response.data.AngelBrokerData.map(
-            (item) => item.AngelId
-          );
-
-          console.log(angelIds);
-          setAccount(angelIds);
+        if (response.data.BrokerIds) {
+          setAccount(response.data.BrokerIds);
         } else {
           console.error("BrokerData is not an array");
           setAccount([]);
@@ -195,6 +190,24 @@ export default function MarketPlace() {
     );
   }
 
+  if (loading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          { backgroundColor: currentTheme.subscribeText },
+        ]}
+      >
+        {" "}
+          <ActivityIndicator
+            size="large"
+            color={currentTheme.color}
+            style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
+          />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: currentTheme.background }]}
@@ -207,392 +220,388 @@ export default function MarketPlace() {
       />
 
       <ScrollView
+        style={[styles.container, { backgroundColor: currentTheme.background }]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {loading ? (
-          <ActivityIndicator
-            size="large"
-            color={currentTheme.color}
-            style={{ marginTop: hp("90%") }}
-          />
-        ) : (
-          strategyData.map((strategy) => (
-            <View
-              style={[styles.card, { backgroundColor: currentTheme.card }]}
-              key={strategy._id}
-            >
-              <View style={styles.header}>
-                <Image source={image} style={styles.img} />
-                <View style={styles.headerText}>
-                  <Text style={[styles.title, { color: currentTheme.color }]}>
-                    {strategy.title}
-                  </Text>
-                  <Text
-                    style={[styles.subtitle, { color: currentTheme.color }]}
-                  >
-                    Strategy : {strategy.strategyType}
-                  </Text>
-                </View>
+        {strategyData.map((strategy) => (
+          <View
+            style={[styles.card, { backgroundColor: currentTheme.card }]}
+            key={strategy._id}
+          >
+            <View style={styles.header}>
+              <Image source={image} style={styles.img} />
+              <View style={styles.headerText}>
+                <Text style={[styles.title, { color: currentTheme.color }]}>
+                  {strategy.title}
+                </Text>
+                <Text style={[styles.subtitle, { color: currentTheme.color }]}>
+                  Strategy : {strategy.strategyType}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.content}>
+              <Text
+                style={[
+                  styles.description,
+                  { color: currentTheme.color, marginBottom: hp("4%") },
+                ]}
+              >
+                <Text style={[styles.boldText, { fontSize: hp("1.7%") }]}>
+                  Capital requirement :
+                </Text>
+                {strategy.capitalRequirement}
+              </Text>
+              <Text
+                style={[
+                  styles.description,
+                  { color: currentTheme.color, marginBottom: hp("4%") },
+                ]}
+              >
+                {strategy.description}
+              </Text>
+
+              <View
+                style={[
+                  styles.infoRow,
+                  { borderColor: "gray", borderWidth: 1, borderRadius: 5 },
+                ]}
+              >
+                <Text style={[styles.infoText, { color: currentTheme.color }]}>
+                  ✍️ Created By: {strategy.createdBy}
+                </Text>
               </View>
 
-              <View style={styles.content}>
-                <Text
-                  style={[
-                    styles.description,
-                    { color: currentTheme.color, marginBottom: hp("4%") },
-                  ]}
-                >
-                  <Text style={[styles.boldText, { fontSize: hp("1.7%") }]}>
-                    Capital requirement :
-                  </Text>
-                  {strategy.capitalRequirement}
+              <View
+                style={[
+                  styles.infoRow,
+                  {
+                    borderColor: "gray",
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    marginBottom: hp("1%"),
+                  },
+                ]}
+              >
+                <Text style={[styles.infoText, { color: currentTheme.color }]}>
+                  📅 Created on: {formatDate(strategy.dateOfCreation)}
                 </Text>
-                <Text
-                  style={[
-                    styles.description,
-                    { color: currentTheme.color, marginBottom: hp("4%") },
-                  ]}
-                >
-                  {strategy.description}
-                </Text>
+              </View>
 
+              <View style={styles.statsRow}>
                 <View
                   style={[
-                    styles.infoRow,
-                    { borderColor: "gray", borderWidth: 1, borderRadius: 5 },
-                  ]}
-                >
-                  <Text
-                    style={[styles.infoText, { color: currentTheme.color }]}
-                  >
-                    ✍️ Created By: {strategy.createdBy}
-                  </Text>
-                </View>
-
-                <View
-                  style={[
-                    styles.infoRow,
+                    styles.statsCard,
                     {
                       borderColor: "gray",
                       borderWidth: 1,
                       borderRadius: 5,
-                      marginBottom: hp("1%"),
+                      flex: 1,
                     },
                   ]}
                 >
                   <Text
                     style={[styles.infoText, { color: currentTheme.color }]}
                   >
-                    📅 Created on: {formatDate(strategy.dateOfCreation)}
+                    👥 Subscriber: {strategy.subscribeCount}
                   </Text>
-                </View>
-
-                <View style={styles.statsRow}>
-                  <View
-                    style={[
-                      styles.statsCard,
-                      {
-                        borderColor: "gray",
-                        borderWidth: 1,
-                        borderRadius: 5,
-                        flex: 1,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[styles.infoText, { color: currentTheme.color }]}
-                    >
-                      👥 Subscriber: {strategy.subscribeCount}
-                    </Text>
-                  </View>
-
-                  <View
-                    style={[
-                      styles.statsCard,
-                      {
-                        borderColor: "gray",
-                        borderWidth: 1,
-                        borderRadius: 5,
-                        flex: 1,
-                        marginLeft: wp("2%"),
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[styles.infoText, { color: currentTheme.color }]}
-                    >
-                      🚀 Deployed: {strategy.deployedCount}
-                    </Text>
-                  </View>
                 </View>
 
                 <View
                   style={[
-                    styles.infoRow2,
-                    { borderColor: "gray", borderWidth: 1, borderRadius: 5 },
+                    styles.statsCard,
+                    {
+                      borderColor: "gray",
+                      borderWidth: 1,
+                      borderRadius: 5,
+                      flex: 1,
+                      marginLeft: wp("2%"),
+                    },
                   ]}
                 >
                   <Text
                     style={[styles.infoText, { color: currentTheme.color }]}
                   >
-                    🕒 {strategy.days} at {strategy.time}
+                    🚀 Deployed: {strategy.deployedCount}
                   </Text>
                 </View>
               </View>
 
-              <View style={styles.statsRow}>
-                <TouchableOpacity
+              <View
+                style={[
+                  styles.infoRow2,
+                  { borderColor: "gray", borderWidth: 1, borderRadius: 5 },
+                ]}
+              >
+                <Text style={[styles.infoText, { color: currentTheme.color }]}>
+                  🕒 {strategy.days} at {strategy.time}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.statsRow}>
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: subscribedStrategies.includes(strategy._id)
+                      ? currentTheme.subscribedButtonBackground
+                      : currentTheme.subscribeButton,
+                    borderColor: currentTheme.color,
+                  },
+                ]}
+                onPress={() => handleSubscribe(strategy._id)}
+                disabled={subscribedStrategies.includes(strategy._id)}
+              >
+                <Text
                   style={[
-                    styles.button,
+                    styles.buttonText,
                     {
-                      backgroundColor: subscribedStrategies.includes(
-                        strategy._id
-                      )
-                        ? currentTheme.subscribedButtonBackground
-                        : currentTheme.subscribeButton,
-                      borderColor: currentTheme.color,
+                      color: subscribedStrategies.includes(strategy._id)
+                        ? currentTheme.subscribedText
+                        : currentTheme.subscribeText,
                     },
                   ]}
-                  onPress={() => handleSubscribe(strategy._id)}
-                  disabled={subscribedStrategies.includes(strategy._id)}
                 >
-                  <Text
-                    style={[
-                      styles.buttonText,
-                      {
-                        color: subscribedStrategies.includes(strategy._id)
-                          ? currentTheme.subscribedText
-                          : currentTheme.subscribeText,
-                      },
-                    ]}
-                  >
-                    {subscribedStrategies.includes(strategy._id)
-                      ? "Subscribed"
-                      : "Subscribe"}
-                  </Text>
-                </TouchableOpacity>
+                  {subscribedStrategies.includes(strategy._id)
+                    ? "Subscribed"
+                    : "Subscribe"}
+                </Text>
+              </TouchableOpacity>
 
-                <TouchableOpacity
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: subscribedStrategies.includes(strategy._id)
+                      ? currentTheme.DeployButton // Active button color
+                      : currentTheme.deployButtonDisabledBackground, // Disabled button color
+                    borderColor: currentTheme.color,
+                  },
+                ]}
+                disabled={!subscribedStrategies.includes(strategy._id)}
+                onPress={() => handleDeployed(strategy._id)}
+              >
+                <Text
                   style={[
-                    styles.button,
+                    styles.buttonText,
                     {
-                      backgroundColor: subscribedStrategies.includes(
-                        strategy._id
-                      )
-                        ? currentTheme.DeployButton // Active button color
-                        : currentTheme.deployButtonDisabledBackground, // Disabled button color
-                      borderColor: currentTheme.color,
+                      color: subscribedStrategies.includes(strategy._id)
+                        ? currentTheme.DeployText // Active button text color
+                        : currentTheme.deployButtonDisabledText, // Disabled text color
                     },
                   ]}
-                  disabled={!subscribedStrategies.includes(strategy._id)}
-                  onPress={() => handleDeployed(strategy._id)}
                 >
-                  <Text
-                    style={[
-                      styles.buttonText,
-                      {
-                        color: subscribedStrategies.includes(strategy._id)
-                          ? currentTheme.DeployText // Active button text color
-                          : currentTheme.deployButtonDisabledText, // Disabled text color
-                      },
-                    ]}
-                  >
-                    Deploy
-                  </Text>
+                  Deploy
+                </Text>
 
-                  <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalVisible}
-                    onRequestClose={() => setModalVisible(false)}
-                  >
-                    <View style={[styles.overlay]}>
-                      <View
+                <Modal
+                  animationType="slide"
+                  transparent={true}
+                  visible={modalVisible}
+                  onRequestClose={() => setModalVisible(false)}
+                >
+                  <View style={[styles.overlay]}>
+                    <View
+                      style={[
+                        styles.modalContainer,
+                        { backgroundColor: currentTheme.card },
+                      ]}
+                    >
+                      <Text
                         style={[
-                          styles.modalContainer,
-                          { backgroundColor: currentTheme.card },
+                          styles.headerText,
+                          { color: currentTheme.color, textAlign: "center" },
                         ]}
                       >
-                        <Text
-                          style={[
-                            styles.headerText,
-                            { color: currentTheme.color, textAlign: "center" },
-                          ]}
-                        >
-                          Deployment Configuration
-                        </Text>
+                        Deployment Configuration
+                      </Text>
 
+                      <Text
+                        style={[
+                          styles.descriptionText,
+                          {
+                            color: currentTheme.color,
+                            textAlign: "center",
+                            marginTop: hp("1%"),
+                          },
+                        ]}
+                      >
+                        Please configure the details below before deploying the
+                        strategy:
+                      </Text>
+                      <View style={styles.pickerContainer}>
                         <Text
                           style={[
-                            styles.descriptionText,
-                            {
-                              color: currentTheme.color,
-                              textAlign: "center",
-                              marginTop: hp("1%"),
-                            },
+                            styles.labelText,
+                            { color: currentTheme.color },
                           ]}
                         >
-                          Please configure the details below before deploying
-                          the strategy:
+                          Select Account:
                         </Text>
-                        <View style={styles.pickerContainer}>
-                          <Text
-                            style={[
-                              styles.labelText,
-                              { color: currentTheme.color },
-                            ]}
-                          >
-                            Select Account:
-                          </Text>
-                          <View
-                            style={{
-                              borderColor: "gray",
-                              borderWidth: 2,
-                              height: hp("8%"),
-                              borderRadius: 10,
-                            }}
-                          >
-                            <>
-                              {Array.isArray(Account) && Account.length > 0 ? (
-                                <View>
-                                  <Picker
-                                    selectedValue={selectedItem}
-                                    onValueChange={(itemValue) => {
-                                      setSelectedItem(itemValue);
-                                    }}
+                        <View
+                          style={{
+                            borderColor: "gray",
+                            borderWidth: 2,
+                            height: hp("8%"),
+                            borderRadius: 10,
+                          }}
+                        >
+                          <>
+                            {Array.isArray(Account) && Account.length >= 0 ? (
+                              <View>
+                                <Picker
+                                  selectedValue={selectedItem}
+                                  onValueChange={(itemValue) => {
+                                    setSelectedItem(itemValue);
+                                  }}
+                                  style={{
+                                    width: "100%",
+                                    color: currentTheme.color,
+                                  }}
+                                >
+                                  <Picker.Item
+                                    label="Select a broker..."
+                                    color={
+                                      currentTheme.theme === "dark"
+                                        ? "#000000"
+                                        : "#FFFFFF"
+                                    }
+                                    value=""
                                     style={{
-                                      width: "100%",
-                                      color: currentTheme.color,
+                                      height: hp("6%"),
+                                      borderColor: "gray",
+                                      borderWidth: 1,
                                     }}
-                                  >
+                                  />
+
+                                  <Picker.Item
+                                    label="Paper Trade"
+                                    color={
+                                      currentTheme.theme === "dark"
+                                        ? "#000000"
+                                        : "#FFFFFF"
+                                    }
+                                    value="papertrade"
+                                    style={{
+                                      height: hp("6%"),
+                                      borderColor: "gray",
+                                      borderWidth: 1,
+                                    }}
+                                  />
+                                  {Account.map((item, index) => (
                                     <Picker.Item
-                                      label="Select a broker..."
+                                      key={index}
                                       color={
                                         currentTheme.theme === "dark"
                                           ? "#000000"
                                           : "#FFFFFF"
                                       }
-                                      value=""
-                                      style={{
-                                        height: hp("6%"),
-                                        borderColor: "gray",
-                                        borderWidth: 1,
-                                      }}
+                                      label={item.toString()} // Ensure label is always a string
+                                      value={item.toString()} // Ensure value matches the type of selectedItem
                                     />
-                                    {Account.map((item, index) => (
-                                      <Picker.Item
-                                        key={index}
-                                        color={
-                                          currentTheme.theme === "dark"
-                                            ? "#000000"
-                                            : "#FFFFFF"
-                                        }
-                                        label={item.toString()} // Ensure label is always a string
-                                        value={item.toString()} // Ensure value matches the type of selectedItem
-                                      />
-                                    ))}
-                                  </Picker>
-                                </View>
-                              ) : (
-                                <Text
-                                  style={{
-                                    textAlign: "center",
-                                    textAlignVertical: "center",
-                                    flex: 1,
-                                    color: currentTheme.color,
-                                  }}
-                                >
-                                  No broker
-                                </Text>
-                              )}
-                            </>
-                          </View>
-
-                          <TouchableOpacity
-                            style={[
-                              styles.button2,
-                              {
-                                backgroundColor: currentTheme.maincolor,
-                                paddingVertical: hp("1.5%"), // Vertical padding for responsiveness
-                                paddingHorizontal: wp("5%"), // Horizontal padding
-                                borderRadius: wp("2%"), // Smooth rounded corners
-                                alignItems: "center", // Center text or loader horizontally
-                                justifyContent: "center", // Center content vertically
-                                shadowColor: "#000", // Subtle shadow for depth
-                                shadowOffset: { width: 0, height: hp("0.2%") },
-                                shadowOpacity: 0.2,
-                                shadowRadius: wp("1%"),
-                                elevation: 3,
-                                marginTop: hp("2%"),
-                              },
-                            ]}
-                            onPress={() => handleDeploy(strategy._id)} // Pass the required ID
-                            disabled={loading} // Disable button while loading
-                          >
-                            {loading ? (
-                              <ActivityIndicator color={currentTheme.color} />
+                                  ))}
+                                </Picker>
+                              </View>
                             ) : (
                               <Text
-                                style={[
-                                  styles.buttonText2,
-                                  {
-                                    color: currentTheme.color,
-                                    fontSize: wp("4%"), // Responsive font size
-                                    fontWeight: "600", // Semi-bold for emphasis
-                                    textTransform: "uppercase", // Makes text stand out
-                                  },
-                                ]}
+                                style={{
+                                  textAlign: "center",
+                                  textAlignVertical: "center",
+                                  flex: 1,
+                                  color: currentTheme.color,
+                                }}
                               >
-                                Submit
+                                No broker
                               </Text>
                             )}
-                          </TouchableOpacity>
+                          </>
+                        </View>
 
-                          <TouchableOpacity
-                            style={[
-                              styles.button2,
-                              {
-                                backgroundColor: "#FF0000", // Static background color
-                                paddingVertical: hp("1.5%"), // Vertical padding for responsiveness
-                                paddingHorizontal: wp("5%"), // Horizontal padding
-                                borderRadius: wp("2%"), // Smooth rounded corners
-                                alignItems: "center", // Center text horizontally
-                                justifyContent: "center", // Center content vertically
-                                shadowColor: "#000", // Subtle shadow for depth
-                                shadowOffset: { width: 0, height: hp("0.2%") },
-                                shadowOpacity: 0.2,
-                                shadowRadius: wp("1%"),
-                                elevation: 3, // Shadow effect for Android
-                                marginTop: hp("1%"),
-                              },
-                            ]}
-                            onPress={() => setModalVisible(false)}
-                          >
+                        <TouchableOpacity
+                          style={[
+                            styles.button2,
+                            {
+                              backgroundColor: currentTheme.maincolor,
+                              paddingVertical: hp("1.5%"), // Vertical padding for responsiveness
+                              paddingHorizontal: wp("5%"), // Horizontal padding
+                              borderRadius: wp("2%"), // Smooth rounded corners
+                              alignItems: "center", // Center text or loader horizontally
+                              justifyContent: "center", // Center content vertically
+                              shadowColor: "#000", // Subtle shadow for depth
+                              shadowOffset: { width: 0, height: hp("0.2%") },
+                              shadowOpacity: 0.2,
+                              shadowRadius: wp("1%"),
+                              elevation: 3,
+                              marginTop: hp("2%"),
+                            },
+                          ]}
+                          onPress={() => handleDeploy(strategy._id)} // Pass the required ID
+                          disabled={loading} // Disable button while loading
+                        >
+                          {loading ? (
+                            <ActivityIndicator color={currentTheme.color} />
+                          ) : (
                             <Text
                               style={[
                                 styles.buttonText2,
                                 {
-                                  color: "#FFFFFF", // Static text color
+                                  color: currentTheme.color,
                                   fontSize: wp("4%"), // Responsive font size
                                   fontWeight: "600", // Semi-bold for emphasis
                                   textTransform: "uppercase", // Makes text stand out
                                 },
                               ]}
                             >
-                              Close
+                              Submit
                             </Text>
-                          </TouchableOpacity>
-                        </View>
+                          )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          style={[
+                            styles.button2,
+                            {
+                              backgroundColor: "#FF0000", // Static background color
+                              paddingVertical: hp("1.5%"), // Vertical padding for responsiveness
+                              paddingHorizontal: wp("5%"), // Horizontal padding
+                              borderRadius: wp("2%"), // Smooth rounded corners
+                              alignItems: "center", // Center text horizontally
+                              justifyContent: "center", // Center content vertically
+                              shadowColor: "#000", // Subtle shadow for depth
+                              shadowOffset: { width: 0, height: hp("0.2%") },
+                              shadowOpacity: 0.2,
+                              shadowRadius: wp("1%"),
+                              elevation: 3, // Shadow effect for Android
+                              marginTop: hp("1%"),
+                            },
+                          ]}
+                          onPress={() => setModalVisible(false)}
+                        >
+                          <Text
+                            style={[
+                              styles.buttonText2,
+                              {
+                                color: "#FFFFFF", // Static text color
+                                fontSize: wp("4%"), // Responsive font size
+                                fontWeight: "600", // Semi-bold for emphasis
+                                textTransform: "uppercase", // Makes text stand out
+                              },
+                            ]}
+                          >
+                            Close
+                          </Text>
+                        </TouchableOpacity>
                       </View>
                     </View>
-                  </Modal>
-                </TouchableOpacity>
-              </View>
+                  </View>
+                </Modal>
+              </TouchableOpacity>
             </View>
-          ))
-        )}
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
@@ -601,9 +610,10 @@ export default function MarketPlace() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // padding: wp('5%'),
-    paddingTop: hp("10%"),
-    paddingBottom: hp("10%"),
+    height: hp("100%"),
+    width: wp("100%"),
+    paddingTop: hp(2.5),
+    paddingBottom: hp(4),
   },
   card: {
     borderRadius: wp("3%"),

@@ -11,6 +11,7 @@ import {
   Alert,
   RefreshControl,
   StatusBar,
+  SafeAreaView,
 } from "react-native";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -123,6 +124,29 @@ const PaperTradeTable = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        style={[
+          {
+            backgroundColor: currentTheme.background,
+            flex: 1,
+            height: hp("100%"),
+            width: wp("100%"),
+          
+          },
+        ]}
+      >
+        {" "}
+        <ActivityIndicator
+          size="large"
+          color={currentTheme.color}
+          style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
+        />
+      </SafeAreaView>
+    );
+  }
+
   const renderStrategy = ({ item }) => {
     const pnlValues = item.sheetData.map((row) => parseFloat(row[8]) || 0);
     const totalPnl = pnlValues.reduce((sum, value) => sum + value, 0);
@@ -226,9 +250,7 @@ const PaperTradeTable = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
-      {isLoading ? (
-        <ActivityIndicator size="large" color={currentTheme.color} />
-      ) : allSheetData.length > 0 ? (
+      {allSheetData.length > 0 ? (
         <FlatList
           data={allSheetData}
           renderItem={renderStrategy}
@@ -243,7 +265,6 @@ const PaperTradeTable = () => {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
     borderWidth: 1,
     padding: hp("1%"),
     margin: hp("1%"),
