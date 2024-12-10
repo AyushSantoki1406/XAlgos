@@ -1,4 +1,4 @@
-import { View, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image, StatusBar } from "react-native";
 import React, { useEffect, useContext, useState } from "react";
 import { useNavigation } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -37,6 +37,12 @@ export default function Index() {
     <View
       style={[styles.container, { backgroundColor: currentTheme.background }]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       <Image style={styles.image} source={currentTheme.splashLogo} />
     </View>
   );

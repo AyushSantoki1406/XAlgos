@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  RefreshControl,
+  StatusBar,
 } from "react-native";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -21,64 +23,76 @@ import {
 } from "react-native-responsive-screen";
 import { ThemeContext } from "../../../utils/ThemeContext";
 import { ColorSpace } from "react-native-reanimated";
+import NoDataScreen from "../../_root/NoData";
 
 const PaperTradeTable = () => {
   const { currentTheme } = useContext(ThemeContext);
+  const [isLoading, setIsLoading] = useState(true);
   const [allSheetData, setAllSheetData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [email, setEmail] = useState("");
   const [userSchema, setUserSchema] = useState("");
   const [ids, setId] = useState("");
   const [DeployedData, setDeployedData] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
 
   const url =
     process.env.NODE_ENV === "production" ? ProductionUrl : ProductionUrl;
 
+  const fetchData = async () => {
+    try {
+      const email = await AsyncStorage.getItem("Email");
+      setEmail(email);
+
+      const response = await axios.post(`${url}/dbschema`, {
+        Email: email,
+      });
+      setUserSchema(response.data);
+      console.log(response.data);
+      setId(response.data.DeployedStrategies);
+
+      const response2 = await axios.post(`${url}/getMarketPlaceData`, {
+        email,
+      });
+      const jsonData = response2.data.allData;
+      const filteredData = jsonData.filter((item) => ids.includes(item._id));
+
+      const response3 = await axios.post(`${url}/fetchSheetData`, { email });
+
+      setAllSheetData(response3.data.allSheetData);
+
+      const mergedData = filteredData.map((strategy) => {
+        const deployedInfo = Array.isArray(DeployedData)
+          ? DeployedData.find(
+              (data) => data.Strategy.toString() === strategy._id.toString()
+            )
+          : ",,,,,,,,";
+
+        return {
+          ...strategy,
+          AppliedDate: deployedInfo ? deployedInfo.AppliedDate : "N/A",
+          Index: deployedInfo ? deployedInfo.Index : "N/A",
+        };
+      });
+
+      setFilteredData(mergedData);
+      console.log(mergedData);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const email = await AsyncStorage.getItem("Email");
-        setEmail(email);
-
-        const response = await axios.post(`${url}/dbschema`, {
-          Email: email,
-        });
-        setUserSchema(response.data);
-        console.log(response.data);
-        setId(response.data.DeployedStrategies);
-
-        const response2 = await axios.post(`${url}/getMarketPlaceData`, {
-          email,
-        });
-        const jsonData = response2.data.allData;
-        const filteredData = jsonData.filter((item) => ids.includes(item._id));
-
-        const response3 = await axios.post(`${url}/fetchSheetData`, { email });
-
-        setAllSheetData(response3.data.allSheetData);
-
-        const mergedData = filteredData.map((strategy) => {
-          const deployedInfo = Array.isArray(DeployedData)
-            ? DeployedData.find(
-                (data) => data.Strategy.toString() === strategy._id.toString()
-              )
-            : ",,,,,,,,";
-
-          return {
-            ...strategy,
-            AppliedDate: deployedInfo ? deployedInfo.AppliedDate : "N/A",
-            Index: deployedInfo ? deployedInfo.Index : "N/A",
-          };
-        });
-
-        setFilteredData(mergedData);
-        console.log(mergedData);
-      } catch (e) {
-        console.log(e);
-      }
-    };
     fetchData();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchData();
+    setRefreshing(false);
+  };
 
   // console.log(ids);
 
@@ -118,6 +132,14 @@ const PaperTradeTable = () => {
         style={[styles.container, { backgroundColor: currentTheme.card }]}
         key={item.strategyId}
       >
+        <StatusBar
+          backgroundColor={
+            currentTheme.theme == "light" ? "#FFFFFF" : "#000000"
+          }
+          barStyle={
+            currentTheme.theme == "light" ? "dark-content" : "light-content"
+          }
+        />
         <View style={styles.row}>
           <View style={styles.accountInfo}>
             <Text style={[styles.label, { color: currentTheme.color }]}>
@@ -198,19 +220,22 @@ const PaperTradeTable = () => {
   };
 
   return (
-    <ScrollView style={{ backgroundColor: currentTheme.background }}>
-      {allSheetData.length > 0 ? (
+    <ScrollView
+      style={{ backgroundColor: currentTheme.background }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      {isLoading ? (
+        <ActivityIndicator size="large" color={currentTheme.color} />
+      ) : allSheetData.length > 0 ? (
         <FlatList
           data={allSheetData}
           renderItem={renderStrategy}
           keyExtractor={(item) => item.strategyId.toString()}
         />
       ) : (
-        <ActivityIndicator
-          size="large"
-          color={currentTheme.color}
-          // style={{ marginTop: hp("30%") }}
-        />
+        <NoDataScreen />
       )}
     </ScrollView>
   );
@@ -251,34 +276,40 @@ const styles = StyleSheet.create({
     width: wp("2%"),
     height: hp("2%"),
   },
-  tableContainer: {},
+  tableContainer: {
+    flex: 1,
+  },
   tableHeader: {
     flexDirection: "row",
-    // padding: hp('1%'),
+    backgroundColor: "#e0e0e0", // Light header background
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc", // Header border
   },
   tableHeaderText: {
-    flex: 1,
-    fontWeight: "bold",
     textAlign: "center",
-    padding: wp("0.5%"),
-    width: wp("20%"),
-    borderWidth: 1,
+    fontWeight: "bold",
+    fontSize: hp(1.4),
+    width: wp(28),
+    borderRightWidth: 1,
+    borderRightColor: "#ccc",
   },
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
-    textAlign: "center",
+    borderBottomColor: "#eee",
   },
   tableCell: {
-    flex: 1,
     textAlign: "center",
-    borderWidth: 1,
+    fontSize: hp(1.2),
+    width: wp(28),
+    borderRightWidth: 1,
+    borderRightColor: "#ccc",
   },
   noDataText: {
     textAlign: "center",
-    borderColor: "#ccc",
-    borderWidth: 1,
+    fontSize: hp(2),
+    color: "#888",
+    paddingVertical: hp(1),
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, StatusBar } from "react-native";
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -13,6 +13,12 @@ const NoDataScreen = () => {
     <View
       style={[styles.container, { backgroundColor: currentTheme.background }]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       <Image source={imageUrl} style={styles.image} />
       <Text style={styles.title}>OPPS! NO INTERNET</Text>
       <Text style={styles.description}>

@@ -7,6 +7,7 @@ import {
   Image,
   StyleSheet,
   ScrollView,
+  StatusBar,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -33,7 +34,7 @@ const EditProfileScreen = () => {
   useEffect(() => {
     const profile_data = async () => {
       const Email = await AsyncStorage.getItem("Email");
-      console.log(Email)
+      console.log(Email);
       const response = await axios.post(`${url}/profile`, {
         Email,
       });
@@ -69,6 +70,12 @@ const EditProfileScreen = () => {
         { backgroundColor: currentTheme.background },
       ]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}

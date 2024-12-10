@@ -7,6 +7,8 @@ import {
   Image,
   TouchableOpacity,
   RefreshControl,
+  ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import {
@@ -33,6 +35,7 @@ export default function Broker() {
   const { currentTheme } = useContext(ThemeContext);
   const [isConnected, setIsConnected] = useState(true);
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   const url = process.env.NODE_ENV === "test" ? ProductionUrl : ProductionUrl;
 
@@ -45,12 +48,14 @@ export default function Broker() {
       console.log(response.data);
     } catch (e) {
       console.log(e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchData(); // Refresh the data
+    await fetchData();
     setRefreshing(false);
   };
 
@@ -96,6 +101,24 @@ export default function Broker() {
     );
   }
 
+  if (isLoading) {
+    return (
+      <SafeAreaView
+        style={[
+          styles.container,
+          { backgroundColor: currentTheme.subscribeText },
+        ]}
+      >
+        {" "}
+        <ActivityIndicator
+          size="large"
+          color={currentTheme.color}
+          style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
+        />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView
       style={[
@@ -103,6 +126,12 @@ export default function Broker() {
         { backgroundColor: currentTheme.subscribeText },
       ]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -121,10 +150,10 @@ export default function Broker() {
                 <View style={styles.infoSection}>
                   <Text style={[styles.label2, { color: currentTheme.color }]}>
                     {broker.userData
-                          ? "AngelOne"
-                          : broker.deltaApiKey
-                          ? "Delta"
-                          : "Unknown"}
+                      ? "AngelOne"
+                      : broker.deltaApiKey
+                      ? "Delta"
+                      : "Unknown"}
                   </Text>
                 </View>
                 <View style={styles.buttonContainer}>
@@ -160,11 +189,11 @@ export default function Broker() {
                   numberOfLines={1}
                 >
                   {broker.userData
-                          ? broker.userData.data.name.toUpperCase()
-                          : broker.userDetails?.result?.first_name?.toUpperCase() +
-                              " " +
-                              broker.userDetails?.result?.last_name.toUpperCase() ||
-                            "N/A"}
+                    ? broker.userData.data.name.toUpperCase()
+                    : broker.userDetails?.result?.first_name?.toUpperCase() +
+                        " " +
+                        broker.userDetails?.result?.last_name.toUpperCase() ||
+                      "N/A"}
                 </Text>
               </View>
 
@@ -174,8 +203,8 @@ export default function Broker() {
                 </Text>
                 <Text style={[styles.value, { color: currentTheme.color }]}>
                   {broker.userData
-                          ? broker.userData.data.clientcode
-                          : broker.deltaApiKey && "No Client Code"}
+                    ? broker.userData.data.clientcode
+                    : broker.deltaApiKey && "No Client Code"}
                 </Text>
               </View>
 

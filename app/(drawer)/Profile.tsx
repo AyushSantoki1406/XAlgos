@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
   ScrollView,
+  StatusBar,
 } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import {
@@ -98,6 +99,12 @@ const ProfileScreen = () => {
         { backgroundColor: currentTheme.background },
       ]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       <View style={styles.profileSection}>
         <Image
           source={{

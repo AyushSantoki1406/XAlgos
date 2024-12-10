@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, StatusBar } from "react-native";
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -13,9 +13,17 @@ const NoDataScreen = () => {
     <View
       style={[styles.container, { backgroundColor: currentTheme.background }]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       {/* Replace the URI with your actual image path */}
       <Image source={imageUrl} style={styles.image} />
-      <Text style={[styles.title,{color:currentTheme.color}]}>OPPS! NO DATA FOUND</Text>
+      <Text style={[styles.title, { color: currentTheme.color }]}>
+        OPPS! NO DATA FOUND
+      </Text>
       <Text style={styles.description}>
         It seems like there’s nothing to display here at the moment. Check back
         later or try refreshing the page!

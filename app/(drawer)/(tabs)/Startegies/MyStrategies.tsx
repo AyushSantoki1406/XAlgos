@@ -10,6 +10,7 @@ import {
   TextInput,
   ActivityIndicator,
   RefreshControl,
+  StatusBar,
 } from "react-native";
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
@@ -144,8 +145,13 @@ const MyStrategies = () => {
           Email,
         });
 
-        if (Array.isArray(response.data.BrokerData)) {
-          setAccount(response.data.BrokerIds);
+        if (Array.isArray(response.data.AngelBrokerData)) {
+          const angelIds = response.data.AngelBrokerData.map(
+            (item) => item.AngelId
+          );
+
+          console.log(angelIds);
+          setAccount(angelIds);
         } else {
           console.error("BrokerData is not an array");
           setAccount([]);
@@ -194,6 +200,13 @@ const MyStrategies = () => {
         { backgroundColor: currentTheme.background },
       ]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
+
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

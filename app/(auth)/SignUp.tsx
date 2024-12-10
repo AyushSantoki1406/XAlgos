@@ -1,5 +1,12 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
-import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+} from "react-native";
+import React, { useState, useEffect, useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   widthPercentageToDP as wp,
@@ -12,12 +19,14 @@ import { ProductionUrl } from "../../URL/URL";
 import img from "../../assets/lightlogo.png";
 import axios from "axios";
 import { router } from "expo-router";
+import { ThemeContext } from "../../utils/ThemeContext";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const verified = false;
   const [isFocused, setIsFocused] = useState(false);
   const navigator = useNavigation();
+  const { currentTheme } = useContext(ThemeContext);
 
   const url =
     process.env.NODE_ENV === "production" ? ProductionUrl : ProductionUrl;
@@ -62,6 +71,12 @@ export default function SignUp() {
 
   return (
     <SafeAreaView style={[styles.container]}>
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       <Image style={styles.image} source={img} />
       <Text style={[styles.header]}>Sign Up</Text>
 

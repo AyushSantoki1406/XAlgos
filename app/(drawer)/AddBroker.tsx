@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Text,
   Alert,
+  StatusBar,
 } from "react-native";
 import {
   widthPercentageToDP as wp,
@@ -183,6 +184,12 @@ export default function App() {
         },
       ]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       <View
         style={[
           styles.card,
@@ -266,7 +273,6 @@ export default function App() {
                 }
                 value={clientId}
                 onChangeText={setClientId}
-              
               />
             </View>
 

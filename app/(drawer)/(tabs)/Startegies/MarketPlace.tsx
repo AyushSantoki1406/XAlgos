@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   Modal,
+  StatusBar,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import image from "../../../../assets/images/strategie_img.png";
@@ -142,7 +143,7 @@ export default function MarketPlace() {
         selectedStrategyId: strategyId,
         Index: "index 1",
         Quaninty: 300,
-        Account,
+        Account: selectedItem,
       });
       console.log(response.data);
       setLoading(false);
@@ -162,9 +163,15 @@ export default function MarketPlace() {
         const response = await axios.post(`${url}/dbschema`, {
           Email,
         });
+        console.log(response.data);
 
-        if (Array.isArray(response.data.BrokerData)) {
-          setAccount(response.data.BrokerIds);
+        if (Array.isArray(response.data.AngelBrokerData)) {
+          const angelIds = response.data.AngelBrokerData.map(
+            (item) => item.AngelId
+          );
+
+          console.log(angelIds);
+          setAccount(angelIds);
         } else {
           console.error("BrokerData is not an array");
           setAccount([]);
@@ -192,6 +199,13 @@ export default function MarketPlace() {
     <SafeAreaView
       style={[styles.container, { backgroundColor: currentTheme.background }]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
+
       <ScrollView
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -510,7 +524,8 @@ export default function MarketPlace() {
                                 shadowOffset: { width: 0, height: hp("0.2%") },
                                 shadowOpacity: 0.2,
                                 shadowRadius: wp("1%"),
-                                elevation: 3, // Shadow effect for Android
+                                elevation: 3,
+                                marginTop: hp("2%"),
                               },
                             ]}
                             onPress={() => handleDeploy(strategy._id)} // Pass the required ID

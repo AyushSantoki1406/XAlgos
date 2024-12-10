@@ -6,6 +6,7 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import { ThemeContext } from "../../../utils/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -26,9 +27,25 @@ const Dashboard = () => {
   const [broker, setBroker] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const [capital, setCapital] = useState("");
+  const [totalBalance, setTotalBalance] = useState(0);
 
   const url =
     process.env.NODE_ENV === "production" ? ProductionUrl : ProductionUrl;
+
+  useEffect(() => {
+    // Calculate total balance
+    let sum = 0;
+
+    broker.forEach((item, index) => {
+      if (item.userData) {
+        sum += Number(capital[index]) || 0;
+      } else {
+        sum += Number(item.balances?.result[0]?.balance_inr) || 0;
+      }
+    });
+
+    setTotalBalance(sum);
+  }, [broker, capital]);
 
   const fetchdata = async () => {
     try {
@@ -39,10 +56,23 @@ const Dashboard = () => {
 
       const response = await axios.post(`${url}/userinfo`, { Email });
       setBroker(response.data);
-      console.log(response.data);
+      console.log(">>>>>>>>", response.data);
 
       const dbschema = await axios.post(`${url}/dbSchema`, { Email });
       console.log("...", dbschema);
+
+      const response2 = await axios.post(`${url}/addbroker`, {
+        First: false,
+        Email,
+        userSchema: "",
+      });
+      console.log("responce data", response2.data);
+      console.log("sum", totalBalance);
+      const a = response2.data;
+      const newCapital = a.map((user) => user.userData.data.availablecash);
+      setCapital(newCapital);
+      console.log("--------", newCapital);
+      console.log(capital);
     } catch (e) {
       console.log("///", e);
     }
@@ -100,6 +130,12 @@ const Dashboard = () => {
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       <SafeAreaView
         style={[styles.container, { backgroundColor: currentTheme.background }]}
       >
@@ -120,7 +156,7 @@ const Dashboard = () => {
                 <Text style={[styles.label, { color: currentTheme.color }]}>
                   Capital
                 </Text>
-                <Text style={styles.green}>₹2012.02</Text>
+                <Text style={styles.green}>₹{totalBalance}</Text>
               </View>
             </View>
           </View>
@@ -149,78 +185,59 @@ const CryptoCard = ({ item }) => {
 
   return (
     <View style={[styles.statsCard, { backgroundColor: currentTheme.card }]}>
-      <TouchableOpacity
-        onPress={toggleVisibility}
-        style={styles.dropdownHeader}
-      >
-        <Text
-          style={[
-            styles.dropdownText,
-            { color: currentTheme.color, paddingBottom: hp("1%") },
-          ]}
-        >
-          Account Information
-        </Text>
-        <Text style={[styles.icon, { color: currentTheme.color }]}>
-          {isVisible ? "▲" : "▼"}
-        </Text>
-      </TouchableOpacity>
-
-      {isVisible && (
-        <View style={styles.accountInfo}>
-          <View style={styles.statItem}>
-            <Text style={[styles.label, { color: currentTheme.color }]}>
-              Name
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <Text style={[styles.value2, { color: currentTheme.color }]}>
-                <Text style={styles.value2} numberOfLines={1}>
-                  {item.userData
-                    ? item.userData.data.name.toUpperCase()
-                    : item.userDetails?.result?.first_name?.toUpperCase() +
-                        " " +
-                        item.userDetails?.result?.last_name.toUpperCase() ||
-                      "N/A"}
-                </Text>
-              </Text>
-            </ScrollView>
-          </View>
-
-          <View style={styles.statItem}>
-            <Text style={[styles.value, { color: currentTheme.color }]}>
-              <Text style={[styles.label, { color: currentTheme.color }]}>
-                Broker
-              </Text>
-              <Text style={styles.green}>
+      <View style={styles.accountInfo}>
+        <View style={styles.statItem}>
+          <Text style={[styles.label, { color: currentTheme.color }]}>
+            Name
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <Text style={[styles.value2, { color: currentTheme.color }]}>
+              <Text style={styles.value2} numberOfLines={1}>
                 {item.userData
-                  ? "AngelOne"
-                  : item.deltaApiKey
-                  ? "Delta"
-                  : "Unknown"}
+                  ? item.userData.data.name.toUpperCase()
+                  : item.userDetails?.result?.first_name?.toUpperCase() +
+                      " " +
+                      item.userDetails?.result?.last_name.toUpperCase() ||
+                    "N/A"}
               </Text>
             </Text>
-          </View>
-
-          <View style={styles.statItem}>
-            <Text style={[styles.value, { color: currentTheme.color }]}>
-              <Text style={[styles.label, { color: currentTheme.color }]}>
-                User Id
-              </Text>
-              <Text style={styles.green}>
-                {item.userData
-                  ? item.userData.data.clientcode
-                  : item.userDetails?.result?.phishing_code || "N/A"}
-              </Text>
-            </Text>
-            <Text style={[styles.value, { color: currentTheme.color }]}>
-              <Text style={[styles.label, { color: currentTheme.color }]}>
-                Strategy No:
-              </Text>
-              <Text style={styles.green}>1</Text>
-            </Text>
-          </View>
+          </ScrollView>
         </View>
-      )}
+
+        <View style={styles.statItem}>
+          <Text style={[styles.value, { color: currentTheme.color }]}>
+            <Text style={[styles.label, { color: currentTheme.color }]}>
+              Broker
+            </Text>
+            <Text style={styles.green}>
+              {item.userData
+                ? "AngelOne"
+                : item.deltaApiKey
+                ? "Delta"
+                : "Unknown"}
+            </Text>
+          </Text>
+        </View>
+
+        <View style={styles.statItem}>
+          <Text style={[styles.value, { color: currentTheme.color }]}>
+            <Text style={[styles.label, { color: currentTheme.color }]}>
+              User Id
+            </Text>
+            <Text style={styles.green}>
+              {item.userData
+                ? item.userData.data.clientcode
+                : item.userDetails?.result?.phishing_code || "N/A"}
+            </Text>
+          </Text>
+          <Text style={[styles.value, { color: currentTheme.color }]}>
+            <Text style={[styles.label, { color: currentTheme.color }]}>
+              Strategy No:
+            </Text>
+            <Text style={styles.green}>1</Text>
+          </Text>
+        </View>
+      </View>
       <View style={styles.statItem}>
         <Text style={[styles.label, { color: currentTheme.color }]}>
           Trade Ratio

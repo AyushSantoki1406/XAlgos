@@ -1,4 +1,11 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  StatusBar,
+} from "react-native";
 import React, { useState, useContext, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -63,6 +70,12 @@ export default function Login() {
     <SafeAreaView
       style={[styles.container, { backgroundColor: currentTheme.background }]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       <Image style={styles.image} source={img} />
       <Text style={[styles.header]}>Log In</Text>
 

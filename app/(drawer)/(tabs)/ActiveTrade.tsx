@@ -1,4 +1,4 @@
-import { View, Text, SafeAreaView, StyleSheet } from "react-native";
+import { View, Text, SafeAreaView, StyleSheet, StatusBar } from "react-native";
 import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { ProductionUrl } from "../../../URL/URL";
@@ -41,6 +41,12 @@ const ActiveTrade = () => {
     <View
       style={[styles.container, { backgroundColor: currentTheme.background }]}
     >
+      <StatusBar
+        backgroundColor={currentTheme.theme == "light" ? "#FFFFFF" : "#000000"}
+        barStyle={
+          currentTheme.theme == "light" ? "dark-content" : "light-content"
+        }
+      />
       <Text style={[{ color: currentTheme.color, paddingTop: hp("5%") }]}>
         ActiveTrade
       </Text>
