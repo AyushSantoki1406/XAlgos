@@ -7,6 +7,7 @@ import {
   RefreshControl,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { ThemeContext } from "../../../utils/ThemeContext";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,6 +20,8 @@ import {
 } from "react-native-responsive-screen";
 import axios from "axios";
 import { ProductionUrl } from "../../../URL/URL";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const Dashboard = () => {
   const { currentTheme } = useContext(ThemeContext);
@@ -28,6 +31,7 @@ const Dashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [capital, setCapital] = useState("");
   const [totalBalance, setTotalBalance] = useState(0);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const url =
     process.env.NODE_ENV === "production" ? ProductionUrl : ProductionUrl;
@@ -48,6 +52,7 @@ const Dashboard = () => {
   }, [broker, capital]);
 
   const fetchdata = async () => {
+    setLoading(true);
     try {
       console.log("asdddddd");
       const Email = await AsyncStorage.getItem("Email");
@@ -75,6 +80,8 @@ const Dashboard = () => {
       console.log(capital);
     } catch (e) {
       console.log("///", e);
+    } finally {
+      setLoading(true);
     }
   };
   const onRefresh = async () => {
@@ -119,11 +126,28 @@ const Dashboard = () => {
     );
   }
 
+  // if (loading) {
+  //   return (
+  //     <SafeAreaView
+  //       style={[
+  //         styles.container,
+  //         { backgroundColor: currentTheme.subscribeText },
+  //       ]}
+  //     >
+  //       {" "}
+  //       <ActivityIndicator
+  //         size="large"
+  //         color={currentTheme.color}
+  //         style={{ justifyContent: "center", alignItems: "center", flex: 1 }}
+  //       />
+  //     </SafeAreaView>
+  //   );
+  // }
+
   return (
     <ScrollView
       style={[
         styles.container,
-        styles.light,
         { backgroundColor: currentTheme.background },
       ]}
       refreshControl={
@@ -145,12 +169,41 @@ const Dashboard = () => {
           >
             <View style={styles.headerContent}>
               <View style={styles.headerItem}>
-                <Text style={[styles.label, { color: currentTheme.color }]}>
-                  P&L
-                </Text>
-                <Text style={[styles.value, { color: currentTheme.color }]}>
-                  ₹
-                </Text>
+                {loading ? (
+                  <>
+                    {/* Skeleton Loader for P&L */}
+                    <Skeleton
+                      customHighlightBackground={
+                        currentTheme.theme === "light"
+                          ? "linear-gradient(90deg, rgba(150, 150, 150, 0.1) 20%, rgba(200, 200, 200, 0.3) 50%, rgba(150, 150, 150, 0.1) 80%)"
+                          : "linear-gradient(90deg, rgba(20, 20, 20, 0.1) 40%, rgba(0, 0, 0, 0.1) 60%)"
+                      }
+                      baseColor={currentTheme.secondbackground}
+                      style={{
+                        borderRadius: 5,
+                        height: hp(4),
+                        width: wp(40),
+                        alignSelf: "center",
+                        // boxShadow:
+                        //   currentTheme.theme === "light"
+                        //     ? "0px 4px 8px rgba(0, 0, 0, 0.1)"
+                        //     : "0px 4px 8px rgba(0, 0, 0, 0.3)",
+                        // borderWidth: 1,
+                      }}
+                    />
+                  </>
+                ) : (
+                  <>
+                    {/* Actual P&L */}
+                    <Text style={[styles.label, { color: currentTheme.color }]}>
+                      P&L
+                    </Text>
+                    {/* Actual value */}
+                    <Text style={[styles.value, { color: currentTheme.color }]}>
+                      ₹
+                    </Text>
+                  </>
+                )}
               </View>
               <View style={styles.headerItem}>
                 <Text style={[styles.label, { color: currentTheme.color }]}>
@@ -160,7 +213,8 @@ const Dashboard = () => {
               </View>
             </View>
           </View>
-          <ScrollView style={[styles.container, styles.light]}>
+
+          <ScrollView style={[styles.container]}>
             {broker.map((item, index) => {
               const uniqueKey =
                 item.id ||
@@ -185,58 +239,53 @@ const CryptoCard = ({ item }) => {
 
   return (
     <View style={[styles.statsCard, { backgroundColor: currentTheme.card }]}>
-      <View style={styles.accountInfo}>
-        <View style={styles.statItem}>
+      <View style={styles.statItem}>
+        <Text style={[styles.label, { color: currentTheme.color }]}>Name</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <Text style={[styles.value2, { color: currentTheme.color }]}>
+            <Text style={styles.value2} numberOfLines={1}>
+              {item.userData
+                ? item.userData.data.name.toUpperCase()
+                : item.userDetails?.result?.first_name?.toUpperCase() +
+                    " " +
+                    item.userDetails?.result?.last_name.toUpperCase() || "N/A"}
+            </Text>
+          </Text>
+        </ScrollView>
+      </View>
+
+      <View style={styles.statItem}>
+        <Text style={[styles.value, { color: currentTheme.color }]}>
           <Text style={[styles.label, { color: currentTheme.color }]}>
-            Name
+            Broker
           </Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <Text style={[styles.value2, { color: currentTheme.color }]}>
-              <Text style={styles.value2} numberOfLines={1}>
-                {item.userData
-                  ? item.userData.data.name.toUpperCase()
-                  : item.userDetails?.result?.first_name?.toUpperCase() +
-                      " " +
-                      item.userDetails?.result?.last_name.toUpperCase() ||
-                    "N/A"}
-              </Text>
-            </Text>
-          </ScrollView>
-        </View>
+          <Text style={styles.green}>
+            {item.userData
+              ? "AngelOne"
+              : item.deltaApiKey
+              ? "Delta"
+              : "Unknown"}
+          </Text>
+        </Text>
+      </View>
 
-        <View style={styles.statItem}>
-          <Text style={[styles.value, { color: currentTheme.color }]}>
-            <Text style={[styles.label, { color: currentTheme.color }]}>
-              Broker
-            </Text>
-            <Text style={styles.green}>
-              {item.userData
-                ? "AngelOne"
-                : item.deltaApiKey
-                ? "Delta"
-                : "Unknown"}
-            </Text>
+      <View style={styles.statItem}>
+        <Text style={[styles.value, { color: currentTheme.color }]}>
+          <Text style={[styles.label, { color: currentTheme.color }]}>
+            User Id
           </Text>
-        </View>
-
-        <View style={styles.statItem}>
-          <Text style={[styles.value, { color: currentTheme.color }]}>
-            <Text style={[styles.label, { color: currentTheme.color }]}>
-              User Id
-            </Text>
-            <Text style={styles.green}>
-              {item.userData
-                ? item.userData.data.clientcode
-                : item.userDetails?.result?.phishing_code || "N/A"}
-            </Text>
+          <Text style={styles.green}>
+            {item.userData
+              ? item.userData.data.clientcode
+              : item.userDetails?.result?.phishing_code || "N/A"}
           </Text>
-          <Text style={[styles.value, { color: currentTheme.color }]}>
-            <Text style={[styles.label, { color: currentTheme.color }]}>
-              Strategy No:
-            </Text>
-            <Text style={styles.green}>1</Text>
+        </Text>
+        <Text style={[styles.value, { color: currentTheme.color }]}>
+          <Text style={[styles.label, { color: currentTheme.color }]}>
+            Strategy No:
           </Text>
-        </View>
+          <Text style={styles.green}>1</Text>
+        </Text>
       </View>
       <View style={styles.statItem}>
         <Text style={[styles.label, { color: currentTheme.color }]}>
@@ -300,12 +349,11 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingBottom: hp("5%"),
   },
-  light: {},
   headerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: wp("4%"),
+    // paddingVertical: wp("4%"),
     marginHorizontal: wp("2%"),
     marginVertical: hp("2%"),
     borderRadius: 20,
@@ -313,7 +361,7 @@ const styles = StyleSheet.create({
   headerContent: {
     flexDirection: "row",
     justifyContent: "space-around",
-    width: "100%",
+    width: wp(100),
   },
   headerItem: {
     alignItems: "center",

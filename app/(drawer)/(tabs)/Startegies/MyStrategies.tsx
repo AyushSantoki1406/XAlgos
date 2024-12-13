@@ -107,7 +107,7 @@ const MyStrategies = () => {
     }
   };
 
-  const handleDeployed = () => {
+  const handleDeployed = (selectedStrategyId) => {
     setModalVisible(true);
   };
 
@@ -124,13 +124,15 @@ const MyStrategies = () => {
         Account: selectedItem,
       });
       console.log("4444444444444", response);
-    } catch (e) {
-      console.log(e);
-    } finally {
       setIndex([]);
       setQuantity("");
       setSelectedItem(null);
-      setModalVisible(false);
+    } catch (e) {
+      console.log(e);
+    } finally {
+      setTimeout(() => {
+        setModalVisible(false);
+      }, 5000);
       setLoading(false);
     }
   };
@@ -423,7 +425,7 @@ const MyStrategies = () => {
                           borderColor: currentTheme.color,
                         },
                       ]}
-                      onPress={() => handleDeployed()}
+                      onPress={() => handleDeployed(strategy._id)}
                     >
                       <Text
                         style={[
@@ -662,15 +664,7 @@ const MyStrategies = () => {
                           disabled={loading} // Disable button while loading
                         >
                           {loading ? (
-                            <ActivityIndicator
-                              size="large"
-                              color={currentTheme.color}
-                              style={{
-                                justifyContent: "center",
-                                alignItems: "center",
-                                flex: 1,
-                              }}
-                            />
+                            <ActivityIndicator color={currentTheme.color} />
                           ) : (
                             <Text
                               style={[

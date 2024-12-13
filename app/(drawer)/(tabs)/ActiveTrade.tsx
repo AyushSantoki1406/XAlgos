@@ -9,6 +9,8 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const ActiveTrade = () => {
   const [isConnected, setIsConnected] = useState(true);
@@ -48,7 +50,26 @@ const ActiveTrade = () => {
         }
       />
       <Text style={[{ color: currentTheme.color, paddingTop: hp("5%") }]}>
-        ActiveTrade
+        <Skeleton
+          customHighlightBackground={
+            currentTheme.theme === "light"
+              ? "linear-gradient(90deg, rgba(150, 150, 150, 0.1) 20%, rgba(200, 200, 200, 0.3) 50%, rgba(150, 150, 150, 0.1) 80%)"
+              : "linear-gradient(90deg, rgba(20, 20, 20, 0.1) 40%, rgba(0, 0, 0, 0.1) 60%)"
+          }
+          baseColor={currentTheme.secondbackground}
+          style={{
+            borderRadius: 12,
+            height: hp(3),
+            width: "95%",
+            alignSelf: "center",
+            boxShadow:
+              currentTheme.theme === "light"
+                ? "0px 4px 8px rgba(0, 0, 0, 0.1)"
+                : "0px 4px 8px rgba(0, 0, 0, 0.3)",
+            borderWidth: 1,
+            borderColor: currentTheme.theme === "light" ? "#F0F0F0" : "#333333",
+          }}
+        />
       </Text>
     </View>
   );
